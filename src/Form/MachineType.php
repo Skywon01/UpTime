@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Form;
+
+use App\Entity\Company;
+use App\Entity\Machine;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
+class MachineType extends AbstractType
+{
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+        $builder
+            ->add('name')
+            ->add('brand')
+            ->add('serialNumber')
+            ->add('status')
+            ->add('company', EntityType::class, [
+                'class' => Company::class,
+                'choice_label' => 'name',
+                'placeholder' => 'Choisissez une entreprise', 'required' => false,
+            ])
+        ;
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
+            'data_class' => Machine::class,
+        ]);
+    }
+
+    public function __toString(): string
+    {
+        return $this->name;
+    }
+}
