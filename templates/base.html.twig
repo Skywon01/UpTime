@@ -15,9 +15,29 @@
 
 
 <body>
-<nav>
-    <a href="{{ path('app_company_index') }}">Entreprises</a>
-    <a href="{{ path('app_machine_index') }}">Machines</a>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="#">⚓ UpTime</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_company_index') }}">Entreprises</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_machine_index') }}">Machines</a>
+                </li>
+            </ul>
+            <div class="d-flex">
+                <span class="navbar-text text-info me-3">
+                    Leg Day terminé ✅
+                </span>
+            </div>
+        </div>
+    </div>
 </nav>
 <div class="container mt-5">
     {% block body %}
