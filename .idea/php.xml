@@ -137,6 +137,8 @@
       <path value="$PROJECT_DIR$/vendor/symfony/cache-contracts" />
       <path value="$PROJECT_DIR$/vendor/symfony/process" />
       <path value="$PROJECT_DIR$/vendor/nikic/php-parser" />
+      <path value="$PROJECT_DIR$/vendor/vich/uploader-bundle" />
+      <path value="$PROJECT_DIR$/vendor/jms/metadata" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.4">

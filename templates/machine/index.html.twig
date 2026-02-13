@@ -9,6 +9,7 @@
         {% for machine in machines %}
             <div class="col-md-4 mb-4">
                 <div class="card h-100 shadow-sm">
+                    <img src="https://picsum.photos/seed/{{ machine.id }}/300/200" class="card-img-top" alt="Image de {{ machine.name }}">
                     <div class="card-body">
                         <h5 class="card-title d-flex justify-content-between align-items-center">
                             {{ machine.name }}
