@@ -3,30 +3,50 @@
 {% block title %}Machine index{% endblock %}
 
 {% block body %}
-    <h1>Machine index</h1>
+    <h1>Liste des machines</h1>
     <a class="btn btn-primary mb-4" href="{{ path('app_machine_new') }}">Ajouter une machine</a>
     <div class="row">
         {% for machine in machines %}
             <div class="col-md-4 mb-4">
                 <div class="card h-100 shadow-sm">
-                    <img src="https://picsum.photos/seed/{{ machine.id }}/300/200" class="card-img-top" alt="Image de {{ machine.name }}">
-                    <div class="card-body">
+                    {% if machine.imageName %}
+                    <img src=" {{ vich_uploader_asset(machine, 'imageFile')}}" class="card-img-top" alt="Image de {{ machine.name }}">
+                    {% else %}
+                        <img src="https://picsum.photos/seed/{{ machine.id }}/300/200" class="card-img-top" alt="Image de {{ machine.name }}">
+                    {% endif %}
+                        <div class="card-body">
                         <h5 class="card-title d-flex justify-content-between align-items-center">
                             {{ machine.name }}
-                            <span class="badge bg-{{ machine.status == 'active' ? 'success' : 'secondary' }} fs-6">
+                            {% set en_panne = false %}
+                            {% for intervention in machine.interventions %}
+                                {% if intervention.endedAt is null %}
+                                    {% set en_panne = true %}
+                                {% endif %}
+                            {% endfor %}
+
+                            <span class="badge bg-{{ en_panne ? 'danger' : 'success' }} fs-6">
+    {{ en_panne ? 'En maintenance' : 'Opérationnelle' }}
+</span>
                             {{ machine.status }}
-                        </span>
+
                         </h5>
                         <h6 class="card-subtitle mb-2 text-muted">{{ machine.brand }}</h6>
 
                         <p class="card-text">
-                            <strong>S/N:</strong> {{ machine.serialNumber }}<br>
+                            <strong>N° Série:</strong> {{ machine.serialNumber }}<br>
                             <strong>Entreprise:</strong> {{ machine.company.name }}
                         </p>
 
                         <div class="d-flex justify-content-between mt-3">
                             <a href="{{ path('app_machine_show', {'id': machine.id}) }}" class="btn btn-sm btn-outline-primary">Voir</a>
                             <a href="{{ path('app_machine_edit', {'id': machine.id}) }}" class="btn btn-sm btn-outline-secondary">Modifier</a>
+                            <a href="{{ path('app_intervention_index', {'machine': machine.id}) }}" class="btn btn-sm btn-outline-info">
+                                📋 Historique
+                            </a>
+                            <a href="{{ path('app_intervention_new', {'machine': machine.id}) }}" class="btn btn-sm btn-success">
+                                + Intervention
+                            </a>
+
                         </div>
                     </div>
                     <div class="card-footer text-muted small">
