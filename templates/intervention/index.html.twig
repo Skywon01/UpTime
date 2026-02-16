@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Intervention index{% endblock %}
+
+{% block body %}
+    <h1>Intervention index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Titre</th>
+                <th>Description</th>
+                <th>Création</th>
+                <th>Prix</th>
+                <th>actions</th>
+                <th>Durée</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for intervention in interventions %}
+            <tr>
+                <td>{{ intervention.id }}</td>
+                <td>{{ intervention.title }}</td>
+                <td>{{ intervention.description }}</td>
+                <td>{{ intervention.createdAt ? intervention.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ intervention.price }}</td>
+                <td>
+                    <a href="{{ path('app_intervention_show', {'id': intervention.id}) }}" class="btn btn-primary">Voir</a>
+                    <a href="{{ path('app_intervention_edit', {'id': intervention.id}) }}" class="btn btn-secondary">Editer</a>
+                </td>
+                <td>{% if intervention.endedAt %}
+                        {% set difference = intervention.endedAt.diff(intervention.createdAt) %}
+                        Durée : {{ difference.h }}h {{ difference.i }}min
+                    {% else %}
+                        <span class="badge bg-warning text-dark">En cours</span>
+                    {% endif %}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_intervention_new') }}" class="btn btn-primary">Nouvelle intervention</a>
+{% endblock %}

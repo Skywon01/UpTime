@@ -30,6 +30,12 @@ class Intervention
     #[ORM\ManyToOne(inversedBy: 'interventions')]
     private ?User $technician = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $price = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $endedAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -91,6 +97,43 @@ class Intervention
     public function setTechnician(?User $technician): static
     {
         $this->technician = $technician;
+
+        return $this;
+    }
+
+    public function getPrice(): ?float
+    {
+        return $this->price;
+    }
+
+    public function setPrice(?float $price): static
+    {
+        $this->price = $price;
+
+        return $this;
+    }
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
+    public function getDuration(): ?\DateInterval
+    {
+        if (!$this->createdAt || !$this->endedAt) {
+            return null;
+        }
+        return $this->createdAt->diff($this->endedAt);
+    }
+
+    public function getEndedAt(): ?\DateTimeImmutable
+    {
+        return $this->endedAt;
+    }
+
+    public function setEndedAt(?\DateTimeImmutable $endedAt): static
+    {
+        $this->endedAt = $endedAt;
 
         return $this;
     }

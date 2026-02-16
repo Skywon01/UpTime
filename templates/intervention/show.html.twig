@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Intervention{% endblock %}
+
+{% block body %}
+    <h1>Intervention</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ intervention.id }}</td>
+            </tr>
+            <tr>
+                <th>Title</th>
+                <td>{{ intervention.title }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ intervention.description }}</td>
+            </tr>
+            <tr>
+                <th>CreatedAt</th>
+                <td>{{ intervention.createdAt ? intervention.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Price</th>
+                <td>{{ intervention.price }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_intervention_index') }}">back to list</a>
+
+    <a href="{{ path('app_intervention_edit', {'id': intervention.id}) }}">edit</a>
+
+    {% if not intervention.endedAt %}
+        <a href="{{ path('app_intervention_close', {'id': intervention.id}) }}"
+           class="btn btn-sm btn-warning">
+            🏁 Terminer
+        </a>
+    {% else %}
+        <span class="badge bg-light text-dark border">
+        Durée : {{ intervention.endedAt.diff(intervention.createdAt).h }}h {{ intervention.endedAt.diff(intervention.createdAt).i }}min
+    </span>
+    {% endif %}
+
+    {{ include('intervention/_delete_form.html.twig') }}
+{% endblock %}
