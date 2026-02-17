@@ -1,3 +1,14 @@
 body {
     background-color: skyblue;
 }
+
+.vich-image img {
+    max-width: 350px;
+    height: auto;
+    border-radius: 8px;
+    margin-top: 10px;
+    display: block;
+    border: 1px solid #dee2e6; /* Équivalent img-thumbnail */
+    padding: 0.25rem;
+    background-color: #fff;
+}

@@ -54,11 +54,18 @@ class Machine
     #[Vich\UploadableField(mapping: 'machine_images', fileNameProperty: 'imageName')]
     private ?File $imageFile = null;
 
+    /**
+     * @var Collection<int, Part>
+     */
+    #[ORM\ManyToMany(targetEntity: Part::class, mappedBy: 'machines')]
+    private Collection $parts;
+
 
     public function __construct()
     {
         $this->interventions = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
+        $this->parts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -210,5 +217,32 @@ class Machine
     public function getImageName(): ?string
     {
         return $this->imageName;
+    }
+
+    /**
+     * @return Collection<int, Part>
+     */
+    public function getParts(): Collection
+    {
+        return $this->parts;
+    }
+
+    public function addPart(Part $part): static
+    {
+        if (!$this->parts->contains($part)) {
+            $this->parts->add($part);
+            $part->addMachine($this);
+        }
+
+        return $this;
+    }
+
+    public function removePart(Part $part): static
+    {
+        if ($this->parts->removeElement($part)) {
+            $part->removeMachine($this);
+        }
+
+        return $this;
     }
 }

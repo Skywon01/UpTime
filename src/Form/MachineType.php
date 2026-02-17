@@ -15,12 +15,22 @@ class MachineType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('name')
-            ->add('brand')
-            ->add('serialNumber')
+            ->add('name', null, [
+                'label' => 'Nom de la machine',
+                'attr' => ['placeholder' => 'ex: Presse hydraulique']
+            ])
+            ->add('brand', null, [
+                'label' => 'Marque',
+                'attr' => ['placeholder' => 'ex: Bosch']
+            ])
+            ->add('serialNumber', null, [
+                'label' => 'Numéro de série',
+                'attr' => ['placeholder' => 'ex: 123456']
+            ])
             ->add('status')
             ->add('company', EntityType::class, [
                 'class' => Company::class,
+                'label' => 'Entreprise associée',
                 'choice_label' => 'name',
                 'placeholder' => 'Choisissez une entreprise', 'required' => false,
             ])
@@ -33,6 +43,7 @@ class MachineType extends AbstractType
                 'image_uri' => true,     // On active l'affichage de l'image existante
                 'asset_helper' => true,
                 'label' => 'Photo de la machine',
+
             ])
 
         ;
