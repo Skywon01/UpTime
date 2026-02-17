@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Part index{% endblock %}
+
+{% block body %}
+    <h1>Part index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Reference</th>
+                <th>Designation</th>
+                <th>Price</th>
+                <th>StockQuantity</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for part in parts %}
+            <tr>
+                <td>{{ part.id }}</td>
+                <td>{{ part.reference }}</td>
+                <td>{{ part.designation }}</td>
+                <td>{{ part.price }}</td>
+                <td>{{ part.stockQuantity }}</td>
+                <td>
+                    <a href="{{ path('app_part_show', {'id': part.id}) }}">show</a>
+                    <a href="{{ path('app_part_edit', {'id': part.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_part_new') }}">Create new</a>
+{% endblock %}
