@@ -1,0 +1,111 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container-fluid mt-4">
+        <h1 class="mb-4">Tableau de bord - UpTime</h1>
+
+        {# Rangée des compteurs #}
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white shadow">
+                    <div class="card-body text-center">
+                        <h5>Total Machines</h5>
+                        <div class="display-4 fw-bold">{{ totalMachines }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card {{ brokenMachines > 0 ? 'bg-danger' : 'bg-success' }} text-white shadow">
+                    <div class="card-body text-center">
+                        <h5>En Panne</h5>
+                        <div class="display-4 fw-bold">{{ brokenMachines }}</div>
+                    </div>
+                </div>
+            </div>
+            {# ... ajoute d'autres compteurs ici ... #}
+        </div>
+
+        <div class="row">
+            {# Alertes Stock #}
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-warning text-dark fw-bold">⚠️ Alertes Stock (Pièces)</div>
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Désignation</th>
+                                <th>Stock</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for part in lowStockParts %}
+                                <tr>
+                                    <td>{{ part.designation }}</td>
+                                    <td class="text-danger fw-bold">{{ part.stockQuantity }}</td>
+                                    <td><a href="{{ path('app_part_edit', {id: part.id}) }}" class="btn btn-sm btn-outline-primary">Ajuster</a></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% set dispoRate = totalMachines > 0 ? (availableMachines / totalMachines * 100)|round : 0 %}
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Disponibilité du Parc</h5>
+            <div class="progress" style="height: 35px;">
+                <div class="progress-bar {{ dispoRate > 80 ? 'bg-success' : (dispoRate > 50 ? 'bg-warning' : 'bg-danger') }}"
+                     role="progressbar"
+                     style="width: {{ dispoRate }}%;">
+                    {{ dispoRate }}% Opérationnel
+                </div>
+            </div>
+            <p class="mt-2 mb-0 small text-muted">
+                {{ availableMachines }} machines prêtes sur {{ totalMachines }}
+            </p>
+        </div>
+    </div>
+    <div class="card shadow mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Top 5 des machines les plus sollicitées</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead>
+                <tr>
+                    <th>Machine</th>
+                    <th class="text-center">Interventions</th>
+                    <th>Fiabilité</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for stat in topMachines %}
+                    <tr>
+                        <td>{{ stat.name }}</td>
+                        <td class="text-center">
+                            <span class="badge rounded-pill bg-primary">{{ stat.interventionCount }}</span>
+                        </td>
+                        <td>
+                            {# Un petit indicateur visuel de fiabilité #}
+                            {% if stat.interventionCount > 10 %}
+                                <span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Critique</span>
+                            {% elseif stat.interventionCount > 5 %}
+                                <span class="text-warning"><i class="bi bi-shield-exclamation"></i> Modérée</span>
+                            {% else %}
+                                <span class="text-success"><i class="bi bi-check-circle"></i> Haute</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

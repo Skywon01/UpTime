@@ -16,6 +16,16 @@ class PartRepository extends ServiceEntityRepository
         parent::__construct($registry, Part::class);
     }
 
+    public function findByLowStock(int $limit): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.stockQuantity <= :limit')
+            ->setParameter('limit', $limit)
+            ->orderBy('p.stockQuantity', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Part[] Returns an array of Part objects
     //     */

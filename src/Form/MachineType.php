@@ -6,6 +6,7 @@ use App\Entity\Company;
 use App\Entity\Machine;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Vich\UploaderBundle\Form\Type\VichImageType;
@@ -27,7 +28,16 @@ class MachineType extends AbstractType
                 'label' => 'Numéro de série',
                 'attr' => ['placeholder' => 'ex: 123456']
             ])
-            ->add('status')
+            ->add('status', ChoiceType::class, [
+                'label' => 'État de la machine',
+                'choices'  => [
+                    'Opérationnel' => 'Opérationnel',
+                    'En maintenance' => 'En maintenance',
+                    'En panne' => 'En panne',
+                    'Hivernage / Arrêt' => 'Hivernage',
+                ],
+                'attr' => ['class' => 'form-select'] // Pour le style Bootstrap
+            ])
             ->add('company', EntityType::class, [
                 'class' => Company::class,
                 'label' => 'Entreprise associée',
