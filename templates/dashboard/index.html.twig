@@ -2,41 +2,86 @@
 
 {% block body %}
     <div class="container-fluid mt-4">
-        <h1 class="mb-4">Tableau de bord - UpTime</h1>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">Tableau de bord - UpTime</h1>
+            <div>
+                <a href="{{ path('app_intervention_new') }}" class="btn btn-primary shadow-sm me-2">
+                    <i class="bi bi-plus-circle"></i> Intervention
+                </a>
+                <a href="{{ path('app_machine_index') }}" class="btn btn-outline-secondary shadow-sm">
+                    <i class="bi bi-gear"></i> Parc
+                </a>
+            </div>
+        </div>
 
-        {# Rangée des compteurs #}
+        {# 1. KPIs (Haut de page) #}
         <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card bg-primary text-white shadow">
-                    <div class="card-body text-center">
-                        <h5>Total Machines</h5>
-                        <div class="display-4 fw-bold">{{ totalMachines }}</div>
+            <div class="col-md-3">
+                <div class="card border-0 border-start border-primary border-4 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Machines</div>
+                        <div class="h3 mb-0 fw-bold text-gray-800">{{ totalMachines }}</div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card {{ brokenMachines > 0 ? 'bg-danger' : 'bg-success' }} text-white shadow">
-                    <div class="card-body text-center">
-                        <h5>En Panne</h5>
-                        <div class="display-4 fw-bold">{{ brokenMachines }}</div>
+            <div class="col-md-3">
+                <div class="card border-0 border-start border-danger border-4 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">En Panne</div>
+                        <div class="h3 mb-0 fw-bold text-gray-800">{{ brokenMachines }}</div>
                     </div>
                 </div>
             </div>
-            {# ... ajoute d'autres compteurs ici ... #}
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        {% set dispoRate = totalMachines > 0 ? (availableMachines / totalMachines * 100)|round : 0 %}
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Disponibilité : {{ dispoRate }}%</div>
+                        <div class="progress mt-2" style="height: 15px;">
+                            <div class="progress-bar {{ dispoRate > 80 ? 'bg-success' : (dispoRate > 50 ? 'bg-warning' : 'bg-danger') }}"
+                                 style="width: {{ dispoRate }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="row">
-            {# Alertes Stock #}
-            <div class="col-md-6">
-                <div class="card shadow mb-4">
-                    <div class="card-header bg-warning text-dark fw-bold">⚠️ Alertes Stock (Pièces)</div>
-                    <div class="card-body">
-                        <table class="table table-hover">
-                            <thead>
+            {# 2. Colonne GAUCHE : Alertes et Urgences #}
+            <div class="col-lg-6">
+                {# Alertes Maintenance (Retard) #}
+                <div class="card shadow-sm mb-4 border-0">
+                    <div class="card-header bg-white py-3 d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+                        <h6 class="m-0 fw-bold text-danger">Alertes Maintenance</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            {% for machine in lateMaintenances %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>{{ machine.name }}</span>
+                                    <span class="badge bg-danger-soft text-danger">Retard : {{ machine.nextMaintenanceAt|date('d/m/Y') }}</span>
+                                </li>
+                            {% else %}
+                                <li class="list-group-item text-center text-muted py-3">Aucun retard détecté</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                {# Alertes Stock #}
+                <div class="card shadow-sm mb-4 border-0">
+                    <div class="card-header bg-white py-3 d-flex align-items-center">
+                        <i class="bi bi-box-seam text-warning me-2"></i>
+                        <h6 class="m-0 fw-bold text-warning">Stocks Critiques</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
                             <tr>
-                                <th>Désignation</th>
+                                <th>Pièce</th>
                                 <th>Stock</th>
-                                <th>Action</th>
+                                <th class="text-end">Action</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -44,7 +89,9 @@
                                 <tr>
                                     <td>{{ part.designation }}</td>
                                     <td class="text-danger fw-bold">{{ part.stockQuantity }}</td>
-                                    <td><a href="{{ path('app_part_edit', {id: part.id}) }}" class="btn btn-sm btn-outline-primary">Ajuster</a></td>
+                                    <td class="text-end">
+                                        <a href="{{ path('app_part_edit', {id: part.id}) }}" class="btn btn-sm btn-light">Ajuster</a>
+                                    </td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -52,60 +99,56 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    {% set dispoRate = totalMachines > 0 ? (availableMachines / totalMachines * 100)|round : 0 %}
+            {# 3. Colonne DROITE : Analyse et Planning #}
+            <div class="col-lg-6">
+                {# Top sollicitées #}
+                <div class="card shadow-sm mb-4 border-0">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="m-0 fw-bold text-dark">Machines les plus sollicitées</h6>
+                    </div>
+                    <div class="card-body p-0 text-small">
+                        <table class="table table-hover mb-0 align-middle">
+                            <tbody>
+                            {% for stat in topMachines %}
+                                <tr>
+                                    <td class="ps-3">{{ stat.name }}</td>
+                                    <td class="text-center"><span class="badge bg-light text-dark">{{ stat.interventionCount }} interventions</span></td>
+                                    <td class="text-end pe-3">
+                                        {% if stat.interventionCount > 10 %}<span class="text-danger small">● Critique</span>
+                                        {% elseif stat.interventionCount > 5 %}<span class="text-warning small">● Modérée</span>
+                                        {% else %}<span class="text-success small">● Haute</span>{% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <h5 class="card-title">Disponibilité du Parc</h5>
-            <div class="progress" style="height: 35px;">
-                <div class="progress-bar {{ dispoRate > 80 ? 'bg-success' : (dispoRate > 50 ? 'bg-warning' : 'bg-danger') }}"
-                     role="progressbar"
-                     style="width: {{ dispoRate }}%;">
-                    {{ dispoRate }}% Opérationnel
+                {# Prochaines maintenances #}
+                <div class="card shadow-sm mb-4 border-0">
+                    <div class="card-header bg-white py-3 d-flex align-items-center">
+                        <i class="bi bi-calendar-event text-info me-2"></i>
+                        <h6 class="m-0 fw-bold text-info">Agenda Préventif</h6>
+                    </div>
+                    <div class="card-body">
+                        {% for machine in upcomingMaintenances %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                                <span class="small fw-bold">{{ machine.name }}</span>
+                                <span class="badge bg-info">{{ machine.nextMaintenanceAt|date('d/m/Y') }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
-            <p class="mt-2 mb-0 small text-muted">
-                {{ availableMachines }} machines prêtes sur {{ totalMachines }}
-            </p>
         </div>
     </div>
-    <div class="card shadow mb-4">
-        <div class="card-header bg-dark text-white">
-            <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Top 5 des machines les plus sollicitées</h5>
-        </div>
-        <div class="card-body p-0">
-            <table class="table table-striped mb-0">
-                <thead>
-                <tr>
-                    <th>Machine</th>
-                    <th class="text-center">Interventions</th>
-                    <th>Fiabilité</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for stat in topMachines %}
-                    <tr>
-                        <td>{{ stat.name }}</td>
-                        <td class="text-center">
-                            <span class="badge rounded-pill bg-primary">{{ stat.interventionCount }}</span>
-                        </td>
-                        <td>
-                            {# Un petit indicateur visuel de fiabilité #}
-                            {% if stat.interventionCount > 10 %}
-                                <span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Critique</span>
-                            {% elseif stat.interventionCount > 5 %}
-                                <span class="text-warning"><i class="bi bi-shield-exclamation"></i> Modérée</span>
-                            {% else %}
-                                <span class="text-success"><i class="bi bi-check-circle"></i> Haute</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+
+    <style>
+        /* Petit bonus pour adoucir les couleurs Bootstrap */
+        .bg-danger-soft { background-color: #fceaea; }
+        .text-xs { font-size: 0.75rem; }
+        .border-4 { border-width: 4px !important; }
+    </style>
 {% endblock %}

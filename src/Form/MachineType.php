@@ -15,6 +15,7 @@ class MachineType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+
         $builder
             ->add('name', null, [
                 'label' => 'Nom de la machine',
@@ -55,9 +56,14 @@ class MachineType extends AbstractType
                 'label' => 'Photo de la machine',
 
             ])
+            ->add('nextMaintenanceAt', null, [
+                'widget' => 'single_text',
+                'label' => 'Prochaine maintenance prévue le',
+                'required' => false,])
 
         ;
     }
+
 
     public function configureOptions(OptionsResolver $resolver): void
     {

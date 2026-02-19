@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class DashboardController extends AbstractController
 {
-    #[Route('/dashboard', name: 'app_dashboard')]
+    #[Route('/', name: 'app_dashboard_index')]
 
 
     public function index(
@@ -33,6 +33,22 @@ final class DashboardController extends AbstractController
         // Tri décroissant : les plus sollicitées en haut
         usort($machineStats, fn($a, $b) => $b['interventionCount'] <=> $a['interventionCount']);
         $availableMachines = $machineRepo->count(['status' => 'Opérationnel']);
+
+        // 1. Les maintenances en retard (Date passée)
+        $lateMaintenances = $machineRepo->createQueryBuilder('m')
+            ->where('m.nextMaintenanceAt < :now')
+            ->setParameter('now', new \DateTimeImmutable())
+            ->getQuery()
+            ->getResult();
+
+// 2. Les maintenances à venir (7 prochains jours par exemple)
+        $upcomingMaintenances = $machineRepo->createQueryBuilder('m')
+            ->where('m.nextMaintenanceAt BETWEEN :now AND :nextWeek')
+            ->setParameter('now', new \DateTimeImmutable())
+            ->setParameter('nextWeek', new \DateTimeImmutable('+7 days'))
+            ->getQuery()
+            ->getResult();
+
         return $this->render('dashboard/index.html.twig', [
             // Récupérer les données pour les statistiques
             'totalMachines' => $machineRepo->count([]),
@@ -44,6 +60,10 @@ final class DashboardController extends AbstractController
 
             'topMachines' => array_slice($machineStats, 0, 5),
             'availableMachines' => $availableMachines,
+
+            'upcomingMaintenances' => $upcomingMaintenances,
+
+            'lateMaintenances' => $lateMaintenances,
         ]);
 
 

@@ -60,6 +60,9 @@ class Machine
     #[ORM\ManyToMany(targetEntity: Part::class, mappedBy: 'machines')]
     private Collection $parts;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $nextMaintenanceAt = null;
+
 
     public function __construct()
     {
@@ -244,5 +247,26 @@ class Machine
         }
 
         return $this;
+    }
+
+    public function getNextMaintenanceAt(): ?\DateTimeImmutable
+    {
+        return $this->nextMaintenanceAt;
+    }
+
+    public function setNextMaintenanceAt(?\DateTimeImmutable $nextMaintenanceAt): static
+    {
+        $this->nextMaintenanceAt = $nextMaintenanceAt;
+
+        return $this;
+    }
+
+    public function isMaintenanceLate(): bool
+    {
+        if (null === $this->nextMaintenanceAt) {
+            return false;
+        }
+
+        return $this->nextMaintenanceAt < new \DateTimeImmutable();
     }
 }
