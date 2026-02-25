@@ -1,111 +1,153 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Machine{% endblock %}
+{% block title %}Détails Machine - {{ machine.name }}{% endblock %}
 
 {% block body %}
-    <h1>Machine</h1>
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ path('app_machine_index') }}">Machines</a></li>
+                        <li class="breadcrumb-item active">{{ machine.name }}</li>
+                    </ol>
+                </nav>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ machine.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ machine.name }}</td>
-            </tr>
-            <tr>
-                <th>Fabricant</th>
-                <td>{{ machine.brand }}</td>
-            </tr>
-            <tr>
-                <th>Numéro de série</th>
-                <td>{{ machine.serialNumber }}</td>
-            </tr>
-            <tr>
-                <th>Status</th>
-                <td>{{ machine.status }}</td>
-            </tr>
-        </tbody>
-    </table>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <h1 class="mb-0">{{ machine.name }}</h1>
+                    <span class="badge {{ machine.status == 'Actif' ? 'bg-success' : 'bg-danger' }} fs-6">
+                    {{ machine.status }}
+                </span>
+                </div>
 
-    <a href="{{ path('app_machine_index') }}" class="btn btn-primary">Retour à la liste</a>
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <table class="table mb-0">
+                            <tbody>
+                            <tr>
+                                <th class="text-muted border-0" style="width: 35%">Fabricant</th>
+                                <td class="border-0">{{ machine.brand }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted border-0">Numéro de série</th>
+                                <td class="border-0"><code>{{ machine.serialNumber }}</code></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted border-0">ID Système</th>
+                                <td class="border-0 text-muted small">#{{ machine.id }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-    <a href="{{ path('app_machine_edit', {'id': machine.id}) }}" class="btn btn-secondary">Editer</a>
+                <div class="d-flex gap-2">
+                    <a href="{{ path('app_intervention_new', {'machine': machine.id}) }}" class="btn btn-warning shadow-sm">
+                        <i class="bi bi-tools"></i> Nouvelle Intervention
+                    </a>
+                    <a href="{{ path('app_machine_edit', {'id': machine.id}) }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-pencil"></i> Éditer
+                    </a>
+                    {{ include('machine/_delete_form.html.twig') }}
+                </div>
+            </div>
 
-    {{ include('machine/_delete_form.html.twig') }}
-
-    <h3 class="mt-5">Historique des interventions</h3>
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>Date</th>
-                <th>Objet</th>
-                <th>Technicien</th>
-                <th>Statut</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for intervention in machine.interventions %}
-                <tr>
-                    <td>{{ intervention.createdAt|date('d/m/Y') }}</td>
-                    <td>{{ intervention.title }}</td>
-                    <td>{{ intervention.technician.email ?? 'N/A' }}</td>
-                    <td>
-                        {% if intervention.endedAt %}
-                            <span class="badge bg-success">Terminé</span>
-                        {% else %}
-                            <a href="{{ path('app_intervention_close', {'id': intervention.id}) }}" class="btn btn-sm btn-warning">Clôturer</a>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="4">Aucune intervention enregistrée.</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <hr class="my-5">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3><i class="bi bi-gear-wide-connected"></i> Pièces détachées compatibles</h3>
-        <a href="{{ path('app_part_new', {'machine': machine.id}) }}" class="btn btn-outline-secondary btn-sm">
-            + Référencer une pièce
-        </a>
-    </div>
-
-    <div class="row">
-        {% for part in machine.parts %}
-            <div class="col-md-6 mb-3">
-                <div class="card bg-light border-0 shadow-sm">
-                    <div class="card-body d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-1">{{ part.designation }}</h6>
-                            <p class="text-muted small mb-0">
-                                Réf : <strong>{{ part.reference }}</strong> |
-                                Fournisseur : {{ part.supplier.name ?? 'Non défini' }}
-                            </p>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 text-center py-4 bg-white">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3 small">Accès Mobile Rapide</h6>
+                        <div class="qr-code-wrapper mb-3">
+                            {# La route app_machine_qr_code doit être créée dans ton MachineController #}
+                            <img src="{{ path('app_machine_qr_code', {'id': machine.id}) }}"
+                                 alt="QR Code de la machine"
+                                 class="img-fluid"
+                                 style="max-width: 180px; border: 1px solid #eee; padding: 5px;">
                         </div>
-                        <div class="text-end">
-                        <span class="badge {{ part.stockQuantity > 0 ? 'bg-info' : 'bg-danger' }}">
-                            Stock : {{ part.stockQuantity }}
-                        </span>
-                            <div class="mt-2 text-primary fw-bold">
-                                {{ part.price|number_format(2, ',', ' ') }} €
-                            </div>
-                        </div>
+                        <p class="text-muted small mb-0">
+                            Scannez ce code pour ouvrir la fiche<br>directement sur votre smartphone.
+                        </p>
                     </div>
                 </div>
             </div>
-        {% else %}
-            <div class="col-12">
-                <p class="text-muted italic">Aucune pièce détachée n'est encore associée à cette machine.</p>
+        </div>
+
+        <hr class="my-5">
+
+        <div class="mb-5">
+            <h3 class="mb-4"><i class="bi bi-clock-history text-primary"></i> Historique des interventions</h3>
+            <div class="card border-0 shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                        <tr>
+                            <th class="ps-3">Date</th>
+                            <th>Objet</th>
+                            <th>Technicien</th>
+                            <th class="text-center">Statut</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for intervention in machine.interventions %}
+                            <tr>
+                                <td class="ps-3">{{ intervention.createdAt|date('d/m/Y') }}</td>
+                                <td class="fw-bold">{{ intervention.title }}</td>
+                                <td>{{ intervention.technician.email ?? 'N/A' }}</td>
+                                <td class="text-center">
+                                    {% if intervention.endedAt %}
+                                        <span class="badge rounded-pill bg-success-subtle text-success border border-success px-3">Terminé</span>
+                                    {% else %}
+                                        <a href="{{ path('app_intervention_close', {'id': intervention.id}) }}" class="btn btn-sm btn-warning">
+                                            Clôturer
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted italic">Aucune intervention enregistrée.</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        {% endfor %}
+        </div>
+
+        <div class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3><i class="bi bi-gear-wide-connected text-primary"></i> Pièces compatibles</h3>
+                <a href="{{ path('app_part_new', {'machine': machine.id}) }}" class="btn btn-outline-primary btn-sm">
+                    + Référencer une pièce
+                </a>
+            </div>
+
+            <div class="row">
+                {% for part in machine.parts %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title fw-bold mb-0 text-truncate" style="max-width: 70%;">{{ part.designation }}</h6>
+                                    <span class="badge {{ part.stockQuantity > 0 ? 'bg-info-subtle text-info border border-info' : 'bg-danger-subtle text-danger border border-danger' }}">
+                                    Stock : {{ part.stockQuantity }}
+                                </span>
+                                </div>
+                                <p class="text-muted small mb-3">
+                                    Réf : <code>{{ part.reference }}</code><br>
+                                    Fournisseur : {{ part.supplier.name ?? 'Non défini' }}
+                                </p>
+                                <div class="text-primary fw-bold fs-5">
+                                    {{ part.price|number_format(2, ',', ' ') }} €
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12 text-center py-4 bg-light rounded">
+                        <p class="text-muted mb-0">Aucune pièce détachée associée à cette machine.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 {% endblock %}

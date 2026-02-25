@@ -6,10 +6,19 @@ use App\Entity\Machine;
 use App\Form\MachineType;
 use App\Repository\MachineRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Color\Color;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Encoding\Encoding;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
 
 #[Route('/machine')]
 final class MachineController extends AbstractController
@@ -68,6 +77,7 @@ final class MachineController extends AbstractController
         ]);
     }
 
+
     #[Route('/{id}', name: 'app_machine_delete', methods: ['POST'])]
     public function delete(Request $request, Machine $machine, EntityManagerInterface $entityManager): Response
     {
@@ -78,4 +88,40 @@ final class MachineController extends AbstractController
 
         return $this->redirectToRoute('app_machine_index', [], Response::HTTP_SEE_OTHER);
     }
+
+    #[Route('/{id}/qrcode', name: 'app_machine_qr_code', methods: ['GET'])]
+    public function generateQrCode(Machine $machine, Request $request): Response
+    {
+
+        $host = $request->getHttpHost();
+        // URL absolue vers la fiche de la machine
+        $url = $request->getScheme() . '://' . $host . $this->generateUrl(
+                'app_machine_show',
+                ['id' => $machine->getId()]
+            );
+
+        // Syntaxe v6 avec arguments nommés
+        $builder = new Builder(
+            writer: new PngWriter(),
+            writerOptions: [],
+            validateResult: false,
+            data: $url,
+            encoding: new Encoding('UTF-8'),
+            errorCorrectionLevel: ErrorCorrectionLevel::High,
+            size: 300,
+            margin: 10,
+            roundBlockSizeMode: RoundBlockSizeMode::Margin
+        );
+
+        $result = $builder->build();
+
+        return new Response(
+            $result->getString(),
+            200,
+            ['Content-Type' => $result->getMimeType()]
+        );
+    }
+
+
+
 }
