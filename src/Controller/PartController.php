@@ -2,11 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\Machine;
 use App\Entity\Part;
 use App\Form\PartType;
 use App\Repository\PartRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -77,5 +79,22 @@ final class PartController extends AbstractController
         }
 
         return $this->redirectToRoute('app_part_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/compatible/{id}', name: 'app_part_compatible', methods: ['GET'])]
+    public function getCompatibleParts(Machine $machine): JsonResponse
+    {
+        $parts = $machine->getParts(); // On récupère les pièces liées à la machine
+
+        $data = [];
+        foreach ($parts as $part) {
+            $data[] = [
+                'id' => $part->getId(),
+                'designation' => $part->getDesignation(),
+                'price' => $part->getPrice()
+            ];
+        }
+
+        return new JsonResponse($data);
     }
 }

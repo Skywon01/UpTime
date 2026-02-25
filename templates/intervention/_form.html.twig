@@ -1,4 +1,108 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn btn-primary">{{ button_label|default('Créer') }}</button>
+    {# On affiche les champs classiques un par un #}
+<div class="row">
+    <div class="col-md-6">{{ form_row(form.title) }}</div>
+    <div class="col-md-6">{{ form_row(form.machine) }}</div>
+</div>
+{{ form_row(form.description) }}
+
+
+<hr>
+<h4><i class="bi bi-tools"></i> Pièces consommées</h4>
+
+{# C'EST ICI QUE LA MAGIE OPÈRE #}
+<div id="parts-container"
+     data-prototype="{{ form_row(form.interventionConsumedParts.vars.prototype)|e('html_attr') }}">
+    {# Si tu modifies une intervention existante, les lignes s'afficheront ici #}
+    {% for row in form.interventionConsumedParts %}
+        <div class="part-row card p-3 mb-3 bg-light">
+            {{ form_row(row) }}
+            <button type="button" class="btn btn-danger btn-sm mt-2 remove-part-btn">
+                <i class="bi bi-trash"></i> Supprimer
+            </button>
+        </div>
+    {% endfor %}
+</div>
+
+<button type="button" class="btn btn-outline-primary add-part-btn mb-4">
+    <i class="bi bi-plus-circle"></i> Ajouter une pièce
+</button>
+
+{# On n'oublie pas les champs cachés comme le token CSRF #}
+    {{ form_rest(form) }}
+
+<hr>
+<button class="btn btn-success btn-lg w-100">{{ button_label|default('Enregistrer l\'intervention') }}</button>
+
 {{ form_end(form) }}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const machineSelect = document.querySelector('select[name*="[machine]"]');
+        const container = document.querySelector('#parts-container');
+        const addButton = document.querySelector('.add-part-btn');
+
+        // --- LES DEUX LIGNES QUI MANQUAIENT ---
+        const prototype = container.dataset.prototype;
+        let index = container.querySelectorAll('.part-row').length;
+        // --------------------------------------
+
+        // Fonction pour mettre à jour UN menu déroulant de pièces via AJAX
+        const updatePartSelect = async (selectElement) => {
+            const machineId = machineSelect.value;
+            if (!machineId) {
+                selectElement.innerHTML = '<option value="">Sélectionnez d\'abord une machine</option>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/part/compatible/${machineId}`);
+                const parts = await response.json();
+
+                selectElement.innerHTML = '<option value="">Choisir une pièce...</option>';
+                parts.forEach(part => {
+                    const option = new Option(part.designation, part.id);
+                    selectElement.add(option);
+                });
+            } catch (error) {
+                console.error('Erreur lors du chargement des pièces:', error);
+            }
+        };
+
+        // Si on change de machine, on rafraîchit tous les selects de pièces déjà présents
+        machineSelect.addEventListener('change', () => {
+            const allPartSelects = container.querySelectorAll('select[name*="[part]"]');
+            allPartSelects.forEach(select => updatePartSelect(select));
+        });
+
+        // Gestion du clic sur "Ajouter une pièce"
+        addButton.addEventListener('click', () => {
+            const newForm = prototype.replace(/__name__/g, index);
+
+            const row = document.createElement('div');
+            row.classList.add('part-row', 'card', 'p-3', 'mb-3', 'bg-light');
+            row.innerHTML = `
+                ${newForm}
+                <button type="button" class="btn btn-danger btn-sm mt-2 remove-part-btn">
+                    <i class="bi bi-trash"></i> Supprimer cette pièce
+                </button>
+            `;
+
+            container.appendChild(row);
+
+            // On filtre le nouveau select immédiatement
+            const newSelect = row.querySelector('select[name*="[part]"]');
+            if (newSelect) {
+                updatePartSelect(newSelect);
+            }
+
+            index++;
+        });
+
+        // --- GESTION DE LA SUPPRESSION ---
+        container.addEventListener('click', (e) => {
+            if (e.target.closest('.remove-part-btn')) {
+                e.target.closest('.part-row').remove();
+            }
+        });
+    });
+</script>

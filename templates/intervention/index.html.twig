@@ -9,10 +9,11 @@
         <thead>
             <tr>
                 <th>Id</th>
+                <th>Machine</th>
                 <th>Titre</th>
                 <th>Description</th>
                 <th>Création</th>
-                <th>Prix</th>
+                <th>Coût pièces</th>
                 <th>actions</th>
                 <th>Durée</th>
             </tr>
@@ -21,10 +22,12 @@
         {% for intervention in interventions %}
             <tr>
                 <td>{{ intervention.id }}</td>
+                <td>{{ intervention.machine ? intervention.machine.name : 'N/A' }}</td>
                 <td>{{ intervention.title }}</td>
                 <td>{{ intervention.description }}</td>
                 <td>{{ intervention.createdAt ? intervention.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ intervention.price }}</td>
+                <td>{{ intervention.TotalPartsCost|number_format(2, ',', ' ') }} €</td>
+
                 <td>
                     <a href="{{ path('app_intervention_show', {'id': intervention.id}) }}" class="btn btn-primary">Voir</a>
                     <a href="{{ path('app_intervention_edit', {'id': intervention.id}) }}" class="btn btn-secondary">Editer</a>

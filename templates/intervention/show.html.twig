@@ -24,8 +24,8 @@
                 <td>{{ intervention.createdAt ? intervention.createdAt|date('Y-m-d H:i:s') : '' }}</td>
             </tr>
             <tr>
-                <th>Price</th>
-                <td>{{ intervention.price }}</td>
+                <th>Coût pièces</th>
+                <td>{{ intervention.TotalPartsCost|number_format(2, ',', ' ') }} €</td>
             </tr>
         </tbody>
     </table>

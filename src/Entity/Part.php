@@ -36,9 +36,16 @@ class Part
     #[ORM\ManyToMany(targetEntity: Machine::class, inversedBy: 'parts')]
     private Collection $machines;
 
+    /**
+     * @var Collection<int, InterventionConsumedPart>
+     */
+    #[ORM\OneToMany(targetEntity: InterventionConsumedPart::class, mappedBy: 'part')]
+    private Collection $interventionConsumedParts;
+
     public function __construct()
     {
         $this->machines = new ArrayCollection();
+        $this->interventionConsumedParts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -126,6 +133,36 @@ class Part
     public function removeMachine(Machine $machine): static
     {
         $this->machines->removeElement($machine);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, InterventionConsumedPart>
+     */
+    public function getInterventionConsumedParts(): Collection
+    {
+        return $this->interventionConsumedParts;
+    }
+
+    public function addInterventionConsumedPart(InterventionConsumedPart $interventionConsumedPart): static
+    {
+        if (!$this->interventionConsumedParts->contains($interventionConsumedPart)) {
+            $this->interventionConsumedParts->add($interventionConsumedPart);
+            $interventionConsumedPart->setPart($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInterventionConsumedPart(InterventionConsumedPart $interventionConsumedPart): static
+    {
+        if ($this->interventionConsumedParts->removeElement($interventionConsumedPart)) {
+            // set the owning side to null (unless already changed)
+            if ($interventionConsumedPart->getPart() === $this) {
+                $interventionConsumedPart->setPart(null);
+            }
+        }
 
         return $this;
     }

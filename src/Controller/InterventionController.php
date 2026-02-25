@@ -35,10 +35,27 @@ final class InterventionController extends AbstractController
                 $intervention->setMachine($machine);
             }
         }
+
         $form = $this->createForm(InterventionType::class, $intervention);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // --- DÉBUT DE LA LOGIQUE DE STOCK ---
+            foreach ($intervention->getInterventionConsumedParts() as $consumedPart) {
+                $part = $consumedPart->getPart();
+                $quantityUsed = $consumedPart->getQuantity();
+
+                if ($part) {
+                    // On soustrait la quantité utilisée au stock actuel
+                    $newStock = $part->getStockQuantity() - $quantityUsed;
+                    $part->setStockQuantity($newStock);
+
+                    // On persist explicitement la pièce pour que Doctrine sache qu'elle a changé
+                    $entityManager->persist($part);
+                }
+            }
+            // --- FIN DE LA LOGIQUE DE STOCK ---
+
             $entityManager->persist($intervention);
             $entityManager->flush();
 

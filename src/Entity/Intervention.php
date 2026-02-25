@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\InterventionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -35,6 +37,12 @@ class Intervention
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $endedAt = null;
+
+    /**
+     * @var Collection<int, InterventionConsumedPart>
+     */
+    #[ORM\OneToMany(targetEntity: InterventionConsumedPart::class, mappedBy: 'intervention', cascade: ['persist'])]
+    private Collection $interventionConsumedParts;
 
     public function getId(): ?int
     {
@@ -116,6 +124,7 @@ class Intervention
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->interventionConsumedParts = new ArrayCollection();
     }
 
     public function getDuration(): ?\DateInterval
@@ -136,5 +145,61 @@ class Intervention
         $this->endedAt = $endedAt;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, InterventionConsumedPart>
+     */
+    public function getInterventionConsumedParts(): Collection
+    {
+        return $this->interventionConsumedParts;
+    }
+
+    public function addInterventionConsumedPart(InterventionConsumedPart $interventionConsumedPart): static
+    {
+        if (!$this->interventionConsumedParts->contains($interventionConsumedPart)) {
+            $this->interventionConsumedParts->add($interventionConsumedPart);
+            $interventionConsumedPart->setIntervention($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInterventionConsumedPart(InterventionConsumedPart $interventionConsumedPart): static
+    {
+        if ($this->interventionConsumedParts->removeElement($interventionConsumedPart)) {
+            // set the owning side to null (unless already changed)
+            if ($interventionConsumedPart->getIntervention() === $this) {
+                $interventionConsumedPart->setIntervention(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getTotalPartsCost(): float
+    {
+        $total = 0;
+        foreach ($this->interventionConsumedParts as $consumedPart) {
+            $total += $consumedPart->getPart()->getPrice() * $consumedPart->getQuantity();
+        }
+        return $total;
+    }
+
+    /**
+     * Calcule la durée en heures (utile pour le coût d'arrêt futur)
+     */
+    public function getDurationInHours(): float
+    {
+        if (!$this->getCreatedAt() || !$this->getEndedAt()) {
+            return 0;
+        }
+
+        $diff = $this->getCreatedAt()->diff($this->getEndedAt());
+
+        // Conversion totale en heures (heures + minutes/60 + jours*24)
+        $hours = $diff->h + ($diff->i / 60) + ($diff->days * 24);
+
+        return round($hours, 2);
     }
 }
