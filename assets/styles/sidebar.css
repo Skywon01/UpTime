@@ -1,0 +1,97 @@
+/* Sidebar Styles Généraux */
+#sidebar {
+    min-width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+    background: var(--dark-bg);
+    color: #fff;
+    transition: all 0.3s ease;
+    min-height: 100vh;
+    z-index: 1051;
+}
+
+/* --- ETAT REDUIT (Desktop) --- */
+#sidebar.active {
+    min-width: var(--sidebar-collapsed-width);
+    max-width: var(--sidebar-collapsed-width);
+}
+
+/* Gestion du texte et logo en mode réduit */
+#sidebar.active .sidebar-header span:not(.text-primary),
+#sidebar.active .nav-link span {
+    display: none;
+}
+
+#sidebar.active .sidebar-header {
+    text-align: center;
+    padding: 1rem 0.5rem;
+}
+
+/* Rotation de la flèche */
+#sidebar.active #sidebarCollapseDesktop i {
+    display: inline-block;
+    transform: rotate(180deg);
+}
+
+/* --- CONTENU --- */
+#content {
+    flex: 1;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    min-width: 0; /* Évite les débordements de tableaux */
+}
+
+/* --- MOBILE (max-width: 768px) --- */
+@media (max-width: 768px) {
+    #sidebar {
+        position: fixed;
+        left: 0;
+        margin-left: calc(-1 * var(--sidebar-width));
+    }
+
+    /* Sur mobile, .active signifie "Affiché en plein" */
+    #sidebar.active {
+        margin-left: 0 !important;
+        min-width: var(--sidebar-width);
+        max-width: var(--sidebar-width);
+    }
+
+    #sidebar.active .sidebar-header span,
+    #sidebar.active .nav-link span {
+        display: inline !important;
+    }
+
+    #sidebar.active::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: var(--sidebar-width);
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.5);
+        z-index: 1049;
+    }
+
+    #content {
+        padding: 1rem;
+        margin-left: 0 !important;
+    }
+
+    #sidebarCollapseMobile {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1052;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    #sidebarCloseMobile i {
+        line-height: 1;
+        vertical-align: middle;
+    }
+}

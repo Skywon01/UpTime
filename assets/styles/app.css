@@ -1,5 +1,10 @@
+@import 'sidebar.css';
+
 body {
     background-color: skyblue;
+    /*background-color: #f8f9fc;*/
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
 .vich-image img {
@@ -11,4 +16,35 @@ body {
     border: 1px solid #dee2e6; /* Équivalent img-thumbnail */
     padding: 0.25rem;
     background-color: #fff;
+}
+:root {
+    --primary-color: #0d6efd;
+    --dark-bg: #1a1d20;
+    --sidebar-width: 240px;
+    --sidebar-collapsed-width: 70px;
+}
+
+#wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+    min-height: 100vh;
+}
+
+/* Le style de #content peut rester ici ou dans sidebar.css
+   car il est lié à la structure globale */
+#content {
+    width: 100%;
+    padding: 2rem;
+    transition: all 0.3s ease;
+}
+
+.animate-pulse {
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
 }

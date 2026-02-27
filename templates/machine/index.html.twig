@@ -1,65 +1,86 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Machine index{% endblock %}
+{% block title %}Parc Machines{% endblock %}
 
 {% block body %}
-    <h1>Liste des machines</h1>
-    <a class="btn btn-primary mb-4" href="{{ path('app_machine_new') }}">Ajouter une machine</a>
-    <div class="row">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <h1 class="mb-0">Liste des machines</h1>
+        <a class="btn btn-primary shadow-sm" href="{{ path('app_machine_new') }}">
+            <i class="bi bi-plus-circle"></i> Ajouter une machine
+        </a>
+    </div>
+
+    <div class="row g-4">
         {% for machine in machines %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    {% if machine.imageName %}
-                    <img src=" {{ vich_uploader_asset(machine, 'imageFile')}}" class="card-img-top" alt="Image de {{ machine.name }}">
-                    {% else %}
-                        <img src="https://picsum.photos/seed/{{ machine.id }}/300/200" class="card-img-top" alt="Image de {{ machine.name }}">
-                    {% endif %}
-                        <div class="card-body">
-                        <h5 class="card-title d-flex justify-content-between align-items-center">
-                            {{ machine.name }}
-                            {% set en_panne = false %}
-                            {% for intervention in machine.interventions %}
-                                {% if intervention.endedAt is null %}
-                                    {% set en_panne = true %}
-                                {% endif %}
-                            {% endfor %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 overflow-hidden">
+                    {# Gestion de l'image avec hauteur fixe pour harmoniser la grille #}
+                    <div style="height: 200px; overflow: hidden; background: #eee;">
+                        {% if machine.imageName %}
+                            <img src="{{ vich_uploader_asset(machine, 'imageFile') }}"
+                                 class="w-100 h-100 object-fit-cover"
+                                 alt="{{ machine.name }}">
+                        {% else %}
+                            <img src="https://picsum.photos/seed/{{ machine.id }}/400/250"
+                                 class="w-100 h-100 object-fit-cover"
+                                 alt="Image par défaut">
+                        {% endif %}
+                    </div>
 
-                            <span class="badge bg-{{ en_panne ? 'danger' : 'success' }} fs-6">
-    {{ en_panne ? 'En maintenance' : 'Opérationnelle' }}
-</span>
-                            {{ machine.status }}
+                    <div class="card-body">
+                        {# Statut dynamique #}
+                        {% set en_panne = false %}
+                        {% for intervention in machine.interventions %}
+                            {% if intervention.endedAt is null %}
+                                {% set en_panne = true %}
+                            {% endif %}
+                        {% endfor %}
 
-                        </h5>
-                        <h6 class="card-subtitle mb-2 text-muted">{{ machine.brand }}</h6>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="card-title mb-0">{{ machine.name }}</h5>
+                                <small class="text-muted">{{ machine.brand }}</small>
+                            </div>
+                            <span class="badge rounded-pill bg-{{ en_panne ? 'danger' : 'success' }}-subtle text-{{ en_panne ? 'danger' : 'success' }} border border-{{ en_panne ? 'danger' : 'success' }}">
+                                {{ en_panne ? 'En maintenance' : 'Opérationnelle' }}
+                            </span>
+                        </div>
 
-                        <p class="card-text">
-                            <strong>N° Série:</strong> {{ machine.serialNumber }}<br>
-                            <strong>Entreprise:</strong> {{ machine.company.name }}
+                        <p class="card-text small bg-light p-2 rounded">
+                            <i class="bi bi-hash text-muted"></i> <strong>Série:</strong> {{ machine.serialNumber }}<br>
+                            <i class="bi bi-building text-muted"></i> <strong>Site:</strong> {{ machine.company.name }}
                         </p>
 
-                        <div class="d-flex justify-content-between mt-3">
-                            <a href="{{ path('app_machine_show', {'id': machine.id}) }}" class="btn btn-sm btn-outline-primary">Voir</a>
-                            <a href="{{ path('app_machine_edit', {'id': machine.id}) }}" class="btn btn-sm btn-outline-secondary">Modifier</a>
-                            <a href="{{ path('app_intervention_index', {'machine': machine.id}) }}" class="btn btn-sm btn-outline-info">
-                                📋 Historique
-                            </a>
-                            <a href="{{ path('app_intervention_new', {'machine': machine.id}) }}" class="btn btn-sm btn-success">
-                                + Intervention
-                            </a>
-
+                        {# Actions : 2 par ligne sur mobile pour rester cliquable #}
+                        <div class="row g-2 mt-2">
+                            <div class="col-6">
+                                <a href="{{ path('app_machine_show', {'id': machine.id}) }}" class="btn btn-sm btn-outline-primary w-100">Voir</a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{{ path('app_machine_edit', {'id': machine.id}) }}" class="btn btn-sm btn-outline-secondary w-100">Modifier</a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{{ path('app_intervention_index', {'machine': machine.id}) }}" class="btn btn-sm btn-outline-info w-100 text-truncate">📋 Hist.</a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{{ path('app_intervention_new', {'machine': machine.id}) }}" class="btn btn-sm btn-success w-100 text-truncate">+ Interv.</a>
+                            </div>
                         </div>
                     </div>
-                    <div class="card-footer text-muted small">
-                        Ajoutée le {{ machine.createdAt|date('d/m/Y') }}
+
+                    <div class="card-footer bg-white text-muted x-small d-flex justify-content-between">
+                        <span>Ajoutée le {{ machine.createdAt|date('d/m/Y') }}</span>
+                        <span class="text-primary fw-bold">#{{ machine.id }}</span>
                     </div>
                 </div>
             </div>
         {% else %}
             <div class="col-12">
-                <p class="alert alert-info">Aucune machine trouvée.</p>
+                <div class="alert alert-info text-center py-5 shadow-sm">
+                    <i class="bi bi-info-circle fs-1 d-block mb-3"></i>
+                    Aucune machine n'est référencée pour le moment.
+                </div>
             </div>
         {% endfor %}
     </div>
-
-
 {% endblock %}

@@ -1,51 +1,87 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Intervention index{% endblock %}
+{% block title %}Interventions{% endblock %}
 
 {% block body %}
-    <h1>Intervention index</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Liste des interventions</h1>
+        <a href="{{ path('app_intervention_new') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Nouvelle intervention
+        </a>
+    </div>
 
-    <table class="table">
-        <thead>
+    {# --- VERSION DESKTOP : TABLEAU (Visible à partir de md) --- #}
+    <div class="d-none d-md-block shadow-sm bg-white rounded">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
             <tr>
-                <th>Id</th>
                 <th>Machine</th>
                 <th>Titre</th>
-                <th>Description</th>
-                <th>Création</th>
+                <th>Date</th>
                 <th>Coût pièces</th>
-                <th>actions</th>
-                <th>Durée</th>
+                <th>Statut / Durée</th>
+                <th class="text-end">Actions</th>
             </tr>
-        </thead>
-        <tbody>
+            </thead>
+            <tbody>
+            {% for intervention in interventions %}
+                <tr>
+                    <td><strong>{{ intervention.machine ? intervention.machine.name : 'N/A' }}</strong></td>
+                    <td>{{ intervention.title }}</td>
+                    <td>{{ intervention.createdAt ? intervention.createdAt|date('d/m/Y H:i') : '' }}</td>
+                    <td>{{ intervention.TotalPartsCost|number_format(2, ',', ' ') }} €</td>
+                    <td>
+                        {% if intervention.endedAt %}
+                            {% set diff = intervention.endedAt.diff(intervention.createdAt) %}
+                            <span class="badge bg-light text-dark border">{{ diff.h }}h {{ diff.i }}min</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">En cours</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{{ path('app_intervention_show', {'id': intervention.id}) }}" class="btn btn-sm btn-outline-primary">Voir</a>
+                        <a href="{{ path('app_intervention_edit', {'id': intervention.id}) }}" class="btn btn-sm btn-outline-secondary">Éditer</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# --- VERSION MOBILE : CARDS (Caché à partir de md) --- #}
+    <div class="d-md-none">
         {% for intervention in interventions %}
-            <tr>
-                <td>{{ intervention.id }}</td>
-                <td>{{ intervention.machine ? intervention.machine.name : 'N/A' }}</td>
-                <td>{{ intervention.title }}</td>
-                <td>{{ intervention.description }}</td>
-                <td>{{ intervention.createdAt ? intervention.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ intervention.TotalPartsCost|number_format(2, ',', ' ') }} €</td>
+            <div class="card mb-3 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title text-primary mb-0">
+                            {{ intervention.machine ? intervention.machine.name : 'N/A' }}
+                        </h5>
+                        {% if intervention.endedAt %}
+                            {% set diff = intervention.endedAt.diff(intervention.createdAt) %}
+                            <small class="text-muted">{{ diff.h }}h {{ diff.i }}min</small>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">En cours</span>
+                        {% endif %}
+                    </div>
 
-                <td>
-                    <a href="{{ path('app_intervention_show', {'id': intervention.id}) }}" class="btn btn-primary">Voir</a>
-                    <a href="{{ path('app_intervention_edit', {'id': intervention.id}) }}" class="btn btn-secondary">Editer</a>
-                </td>
-                <td>{% if intervention.endedAt %}
-                        {% set difference = intervention.endedAt.diff(intervention.createdAt) %}
-                        Durée : {{ difference.h }}h {{ difference.i }}min
-                    {% else %}
-                        <span class="badge bg-warning text-dark">En cours</span>
-                    {% endif %}</td>
-            </tr>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ intervention.title }}</h6>
+                    <p class="card-text small text-truncate">{{ intervention.description }}</p>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="fw-bold text-success">{{ intervention.TotalPartsCost|number_format(2, ',', ' ') }} €</span>
+                        <div class="btn-group">
+                            <a href="{{ path('app_intervention_show', {'id': intervention.id}) }}" class="btn btn-sm btn-primary">Voir</a>
+                            <a href="{{ path('app_intervention_edit', {'id': intervention.id}) }}" class="btn btn-sm btn-outline-secondary">Éditer</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0">
+                    <small class="text-muted">Créé le {{ intervention.createdAt|date('d/m/Y') }}</small>
+                </div>
+            </div>
         {% else %}
-            <tr>
-                <td colspan="6">no records found</td>
-            </tr>
+            <div class="alert alert-info">Aucune intervention enregistrée.</div>
         {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_intervention_new') }}" class="btn btn-primary">Nouvelle intervention</a>
+    </div>
 {% endblock %}

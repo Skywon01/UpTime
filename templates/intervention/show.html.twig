@@ -1,49 +1,94 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Intervention{% endblock %}
+{% block title %}Détail Intervention #{{ intervention.id }}{% endblock %}
 
 {% block body %}
-    <h1>Intervention</h1>
+    <div class="container-fluid p-0">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1">
+                        <li class="breadcrumb-item"><a href="{{ path('app_intervention_index') }}">Interventions</a></li>
+                        <li class="breadcrumb-item active">Détail #{{ intervention.id }}</li>
+                    </ol>
+                </nav>
+                <h1 class="h2 mb-0">{{ intervention.title }}</h1>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ path('app_intervention_edit', {'id': intervention.id}) }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-pencil"></i> <span class="d-none d-md-inline">Modifier</span>
+                </a>
+                {{ include('intervention/_delete_form.html.twig') }}
+            </div>
+        </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ intervention.id }}</td>
-            </tr>
-            <tr>
-                <th>Title</th>
-                <td>{{ intervention.title }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ intervention.description }}</td>
-            </tr>
-            <tr>
-                <th>CreatedAt</th>
-                <td>{{ intervention.createdAt ? intervention.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Coût pièces</th>
-                <td>{{ intervention.TotalPartsCost|number_format(2, ',', ' ') }} €</td>
-            </tr>
-        </tbody>
-    </table>
+        <div class="row g-4">
+            <div class="col-12 col-lg-8">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title mb-0"><i class="bi bi-file-text me-2"></i>Détails de l'intervention</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label class="text-muted small text-uppercase fw-bold">Description</label>
+                            <p class="lead mt-1">{{ intervention.description|nl2br }}</p>
+                        </div>
 
-    <a href="{{ path('app_intervention_index') }}">back to list</a>
+                        <div class="row g-3">
+                            <div class="col-6 col-md-4">
+                                <label class="text-muted small text-uppercase fw-bold d-block">Machine</label>
+                                <span class="badge bg-info text-dark fs-6">
+                                    <i class="bi bi-cpu"></i> {{ intervention.machine ? intervention.machine.name : 'N/A' }}
+                                </span>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <label class="text-muted small text-uppercase fw-bold d-block">Créé le</label>
+                                <span><i class="bi bi-calendar3"></i> {{ intervention.createdAt|date('d/m/Y H:i') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <a href="{{ path('app_intervention_edit', {'id': intervention.id}) }}">edit</a>
+            <div class="col-12 col-lg-4">
+                <div class="card shadow-sm border-0 bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">Statut & Bilan</h5>
 
-    {% if not intervention.endedAt %}
-        <a href="{{ path('app_intervention_close', {'id': intervention.id}) }}"
-           class="btn btn-sm btn-warning">
-            🏁 Terminer
-        </a>
-    {% else %}
-        <span class="badge bg-light text-dark border">
-        Durée : {{ intervention.endedAt.diff(intervention.createdAt).h }}h {{ intervention.endedAt.diff(intervention.createdAt).i }}min
-    </span>
-    {% endif %}
+                        <div class="d-grid gap-3">
+                            <div class="p-3 bg-white rounded border">
+                                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Temps passé</label>
+                                {% if intervention.endedAt %}
+                                    {% set diff = intervention.endedAt.diff(intervention.createdAt) %}
+                                    <h4 class="mb-0 text-primary">
+                                        <i class="bi bi-clock-history"></i> {{ diff.h }}h {{ diff.i }}min
+                                    </h4>
+                                {% else %}
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="badge bg-warning text-dark fs-6 animate-pulse">En cours</span>
+                                        <a href="{{ path('app_intervention_close', {'id': intervention.id}) }}" class="btn btn-warning btn-sm">
+                                            🏁 Terminer
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
 
-    {{ include('intervention/_delete_form.html.twig') }}
+                            <div class="p-3 bg-white rounded border">
+                                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Coût des pièces</label>
+                                <h4 class="mb-0 text-success">
+                                    <i class="bi bi-currency-euro"></i> {{ intervention.TotalPartsCost|number_format(2, ',', ' ') }} €
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-grid">
+                    <a href="{{ path('app_intervention_index') }}" class="btn btn-link text-muted">
+                        <i class="bi bi-arrow-left"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
