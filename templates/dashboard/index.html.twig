@@ -2,44 +2,78 @@
 
 {% block body %}
     <div class="container-fluid mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h2">Tableau de bord - UpTime</h1>
-            <div>
-                <a href="{{ path('app_intervention_new') }}" class="btn btn-primary shadow-sm me-2">
-                    <i class="bi bi-plus-circle"></i> Intervention
-                </a>
-                <a href="{{ path('app_machine_index') }}" class="btn btn-outline-secondary shadow-sm">
-                    <i class="bi bi-gear"></i> Parc
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <h1 class="h3 mb-0 text-gray-800">Tableau de bord <span class="text-primary fw-light">| UpTime</span></h1>
+            <div class="d-flex gap-2">
+                <a href="{{ path('app_intervention_new') }}" class="btn btn-primary shadow-sm">
+                    <i class="bi bi-plus-lg"></i> <span class="d-none d-md-inline">Nouvelle Intervention</span>
                 </a>
             </div>
         </div>
 
-        {# 1. KPIs (Haut de page) #}
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card border-0 border-start border-primary border-4 shadow-sm h-100">
+        {# --- NOUVEAUX KPIs --- #}
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm border-start border-warning border-4 h-100">
                     <div class="card-body">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Machines</div>
-                        <div class="h3 mb-0 fw-bold text-gray-800">{{ totalMachines }}</div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">En cours</div>
+                                <div class="h4 mb-0 fw-bold text-dark">{{ activeInterventionsCount }}</div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center rounded-circle bg-warning-subtle"
+                                 style="width: 48px; height: 48px; flex-shrink: 0;">
+                                <i class="bi bi-tools text-warning fs-4"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card border-0 border-start border-danger border-4 shadow-sm h-100">
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm border-start border-success border-4 h-100">
                     <div class="card-body">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">En Panne</div>
-                        <div class="h3 mb-0 fw-bold text-gray-800">{{ brokenMachines }}</div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Coût Total</div>
+                                <div class="h4 mb-0 fw-bold text-dark">{{ totalCost|number_format(0, ',', ' ') }} €</div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center rounded-circle bg-success-subtle"
+                                 style="width: 48px; height: 48px; flex-shrink: 0;">
+                                <i class="bi bi-currency-euro text-success fs-4"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card border-0 shadow-sm h-100">
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm border-start border-danger border-4 h-100">
                     <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Hors Service</div>
+                                <div class="h4 mb-0 fw-bold text-dark">{{ brokenMachines }}</div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center rounded-circle bg-danger-subtle"
+                                 style="width: 48px; height: 48px; flex-shrink: 0;">
+                                <i class="bi bi-exclamation-octagon text-danger fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm border-start border-primary border-4 h-100">
+                    <div class="card-body d-flex flex-column justify-content-center">
                         {% set dispoRate = totalMachines > 0 ? (availableMachines / totalMachines * 100)|round : 0 %}
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Disponibilité : {{ dispoRate }}%</div>
-                        <div class="progress mt-2" style="height: 15px;">
-                            <div class="progress-bar {{ dispoRate > 80 ? 'bg-success' : (dispoRate > 50 ? 'bg-warning' : 'bg-danger') }}"
-                                 style="width: {{ dispoRate }}%;"></div>
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Disponibilité</div>
+                        <div class="d-flex align-items-center">
+                            <div class="h4 mb-0 fw-bold text-dark me-3">{{ dispoRate }}%</div>
+                            <div class="progress w-100" style="height: 8px;">
+                                <div class="progress-bar bg-primary" style="width: {{ dispoRate }}%"></div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -19,53 +19,50 @@ final class DashboardController extends AbstractController
         PartRepository $partRepo,
         InterventionRepository $interRepo
     ): Response {
+        // On garde tes logiques de stats existantes
         $allMachines = $machineRepo->findAll();
         $machineStats = [];
-
         foreach ($allMachines as $machine) {
             $machineStats[] = [
-                'name' => $machine->getName(), // Assure-toi que la méthode existe (ou getName())
+                'name' => $machine->getName(),
                 'interventionCount' => $machine->getInterventions()->count(),
                 'status' => $machine->getStatus(),
             ];
         }
-
-        // Tri décroissant : les plus sollicitées en haut
         usort($machineStats, fn($a, $b) => $b['interventionCount'] <=> $a['interventionCount']);
-        $availableMachines = $machineRepo->count(['status' => 'Opérationnel']);
 
-        // 1. Les maintenances en retard (Date passée)
-        $lateMaintenances = $machineRepo->createQueryBuilder('m')
-            ->where('m.nextMaintenanceAt < :now')
-            ->setParameter('now', new \DateTimeImmutable())
-            ->getQuery()
-            ->getResult();
+        // NOUVEAU : Calcul du coût total de toutes les interventions
+        $allInterventions = $interRepo->findAll();
+        $totalCost = 0;
+        foreach ($allInterventions as $inter) {
+            $totalCost += $inter->getTotalPartsCost();
+        }
 
-// 2. Les maintenances à venir (7 prochains jours par exemple)
-        $upcomingMaintenances = $machineRepo->createQueryBuilder('m')
-            ->where('m.nextMaintenanceAt BETWEEN :now AND :nextWeek')
-            ->setParameter('now', new \DateTimeImmutable())
-            ->setParameter('nextWeek', new \DateTimeImmutable('+7 days'))
+        // NOUVEAU : Interventions en cours (pas de endedAt)
+        $activeInterventionsCount = $interRepo->createQueryBuilder('i')
+            ->select('count(i.id)')
+            ->where('i.endedAt IS NULL')
             ->getQuery()
-            ->getResult();
+            ->getSingleScalarResult();
 
         return $this->render('dashboard/index.html.twig', [
-            // Récupérer les données pour les statistiques
             'totalMachines' => $machineRepo->count([]),
             'brokenMachines' => $machineRepo->count(['status' => 'en panne']),
-
+            'activeInterventionsCount' => $activeInterventionsCount, // Ajouté
+            'totalCost' => $totalCost, // Ajouté
             'lowStockParts' => $partRepo->findByLowStock(5),
-
             'recentInterventions' => $interRepo->findBy([], ['createdAt' => 'DESC'], 5),
-
             'topMachines' => array_slice($machineStats, 0, 5),
-            'availableMachines' => $availableMachines,
-
-            'upcomingMaintenances' => $upcomingMaintenances,
-
-            'lateMaintenances' => $lateMaintenances,
+            'availableMachines' => $machineRepo->count(['status' => 'Opérationnel']),
+            'upcomingMaintenances' => $machineRepo->createQueryBuilder('m')
+                ->where('m.nextMaintenanceAt BETWEEN :now AND :nextWeek')
+                ->setParameter('now', new \DateTimeImmutable())
+                ->setParameter('nextWeek', new \DateTimeImmutable('+7 days'))
+                ->getQuery()->getResult(),
+            'lateMaintenances' => $machineRepo->createQueryBuilder('m')
+                ->where('m.nextMaintenanceAt < :now')
+                ->setParameter('now', new \DateTimeImmutable())
+                ->getQuery()->getResult(),
         ]);
-
-
     }
 }

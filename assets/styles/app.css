@@ -48,3 +48,9 @@ body {
     70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
     100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
 }
+
+.text-xs { font-size: 0.7rem; letter-spacing: 0.05rem; }
+.border-4 { border-width: 4px !important; }
+.bg-warning-subtle { background-color: rgba(255, 193, 7, 0.15); }
+.bg-success-subtle { background-color: rgba(25, 135, 84, 0.15); }
+.bg-danger-subtle { background-color: rgba(220, 53, 69, 0.15); }
