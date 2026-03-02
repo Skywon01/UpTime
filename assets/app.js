@@ -10,3 +10,4 @@ import './styles/app.css';
 console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
 
 import './js/sidebar.js'
+import './js/intervention_form.js';
