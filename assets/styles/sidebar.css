@@ -7,6 +7,8 @@
     transition: all 0.3s ease;
     min-height: 100vh;
     z-index: 1051;
+    position: relative;
+
 }
 
 /* --- ETAT REDUIT (Desktop) --- */
@@ -26,9 +28,12 @@
     padding: 1rem 0.5rem;
 }
 
+#sidebar.active #sidebarCollapseDesktop {
+    right: -12px; /* Garde le bouton à cheval */
+}
+
 /* Rotation de la flèche */
 #sidebar.active #sidebarCollapseDesktop i {
-    display: inline-block;
     transform: rotate(180deg);
 }
 
@@ -94,4 +99,21 @@
         line-height: 1;
         vertical-align: middle;
     }
+}
+#sidebar.active .nav-link span,
+#sidebar.active .sidebar-header span:not(.text-primary) {
+    opacity: 0;
+    width: 0;
+    display: none;
+}
+
+/* Hover sur les liens pour un look moderne */
+.nav-link {
+    transition: all 0.2s;
+    border-radius: 8px !important;
+    margin: 0 5px;
+}
+
+.nav-link:hover {
+    background: rgba(255,255,255,0.1);
 }
