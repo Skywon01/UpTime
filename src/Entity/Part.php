@@ -6,6 +6,7 @@ use App\Repository\PartRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 
 #[ORM\Entity(repositoryClass: PartRepository::class)]
 class Part
@@ -165,5 +166,18 @@ class Part
         }
 
         return $this;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function reduceStock(int $quantity): void
+    {
+        if ($this->stockQuantity < $quantity) {
+
+             throw new Exception("Stock insuffisant !");
+        }
+
+        $this->stockQuantity -= $quantity;
     }
 }

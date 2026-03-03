@@ -1,4 +1,49 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+<div class="card border-0 shadow-sm p-4">
+    <h5 class="mb-4 text-primary"><i class="bi bi-info-circle me-2"></i>Informations Générales</h5>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            {{ form_row(form.reference) }}
+        </div>
+        <div class="col-md-8">
+            {{ form_row(form.designation) }}
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    <h5 class="mb-4 text-primary"><i class="bi bi-cart4 me-2"></i>Achat & Stock</h5>
+    <div class="row g-3">
+        <div class="col-md-4">
+            {{ form_row(form.supplier) }}
+        </div>
+        <div class="col-md-4">
+            {{ form_row(form.price) }}
+        </div>
+        <div class="col-md-4">
+            {{ form_row(form.stockQuantity) }}
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    <h5 class="mb-4 text-primary"><i class="bi bi-cpu me-2"></i>Compatibilité</h5>
+    <div class="row">
+        <div class="col-12">
+            {{ form_row(form.machines) }}
+            <div class="form-text mt-0 mb-3">Sélectionnez toutes les machines sur lesquelles cette pièce peut être installée.</div>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-success btn-lg flex-grow-1">
+            <i class="bi bi-check-lg me-2"></i>{{ button_label|default('Enregistrer la pièce') }}
+        </button>
+        <a href="{{ path('app_part_index') }}" class="btn btn-outline-secondary btn-lg">Annuler</a>
+    </div>
+</div>
+
+{# On laisse Symfony gérer les champs cachés (CSRF token) #}
+    {{ form_rest(form) }}
 {{ form_end(form) }}

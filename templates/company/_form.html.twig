@@ -1,4 +1,38 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+<div class="card border-0 shadow-sm p-4">
+    <div class="row g-4">
+        {# Section Identité #}
+        <div class="col-md-6">
+            <h5 class="mb-3 text-primary"><i class="bi bi-info-square me-2"></i>Identité Commerciale</h5>
+            <div class="mb-3">
+                {{ form_row(form.name, {
+                    'label': 'Nom de l\'entreprise',
+                    'attr': {'placeholder': 'Ex: UpTime Maintenance Services'}
+                }) }}
+            </div>
+        </div>
+
+        {# Section Légale #}
+        <div class="col-md-6">
+            <h5 class="mb-3 text-primary"><i class="bi bi-file-earmark-text me-2"></i>Informations Légales</h5>
+            <div class="mb-3">
+                {{ form_row(form.siret, {
+                    'label': 'Numéro SIRET',
+                    'attr': {'placeholder': '14 chiffres (ex: 123 456 789 00012)'}
+                }) }}
+            </div>
+        </div>
+    </div>
+
+    {# On pourrait ajouter ici des champs adresse, logo, etc. si tu les as dans ton entité #}
+
+    <div class="mt-4 pt-3 border-top d-flex gap-2">
+        <button class="btn btn-primary btn-lg flex-grow-1 shadow-sm">
+            <i class="bi bi-check-lg me-2"></i>Enregistrer la configuration
+        </button>
+        <a href="{{ path('app_company_index') }}" class="btn btn-outline-secondary btn-lg">Annuler</a>
+    </div>
+</div>
+
+{{ form_rest(form) }}
 {{ form_end(form) }}

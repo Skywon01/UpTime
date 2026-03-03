@@ -17,30 +17,35 @@ class PartType extends AbstractType
         $builder
             ->add('reference', null, [
                 'label' => 'Référence constructeur',
-                'attr' => ['placeholder' => 'ex: SKU-9900']
+                'attr' => ['class' => 'form-control', 'placeholder' => 'ex: SKU-9900']
             ])
             ->add('designation', null, [
                 'label' => 'Nom de la pièce',
-                'attr' => ['placeholder' => 'ex: Courroie de transmission']
+                'attr' => ['class' => 'form-control', 'placeholder' => 'ex: Courroie']
             ])
+            // On peut grouper prix et stock sur la même ligne dans le Twig plus tard
             ->add('price', null, [
                 'label' => 'Prix d\'achat HT',
-                'help' => 'Prix unitaire'
+                'attr' => ['class' => 'form-control']
             ])
             ->add('stockQuantity', null, [
-                'label' => 'Quantité en stock'
+                'label' => 'Quantité en stock',
+                'attr' => ['class' => 'form-control']
             ])
             ->add('supplier', EntityType::class, [
-                'class' => \App\Entity\Supplier::class,
+                'class' => Supplier::class,
                 'choice_label' => 'name',
-                'label' => 'Fournisseur'
+                'label' => 'Fournisseur principal',
+                'placeholder' => '--- Sélectionner un fournisseur ---',
+                'attr' => ['class' => 'form-select']
             ])
             ->add('machines', EntityType::class, [
-                'class' => \App\Entity\Machine::class,
+                'class' => Machine::class,
                 'choice_label' => 'name',
                 'multiple' => true,
-                'expanded' => true, // Liste déroulante multi-sélection (plus compacte)
-                'label' => 'Machines compatibles'
+                'expanded' => false, // Plus propre si la liste s'allonge
+                'label' => 'Machines compatibles',
+                'attr' => ['class' => 'form-select select2-enable'] // Une classe pour le JS plus tard
             ])
         ;
     }

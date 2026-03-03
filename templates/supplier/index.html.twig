@@ -1,43 +1,81 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Supplier index{% endblock %}
+{% block title %}Annuaire Fournisseurs{% endblock %}
 
 {% block body %}
-    <h1>Supplier index</h1>
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3"><i class="bi bi-truck text-primary me-2"></i>Annuaire Fournisseurs</h1>
+            <a href="{{ path('app_supplier_new') }}" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-lg"></i> Nouveau Fournisseur
+            </a>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>ContactName</th>
-                <th>Email</th>
-                <th>PhoneNumber</th>
-                <th>Website</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for supplier in suppliers %}
-            <tr>
-                <td>{{ supplier.id }}</td>
-                <td>{{ supplier.name }}</td>
-                <td>{{ supplier.contactName }}</td>
-                <td>{{ supplier.email }}</td>
-                <td>{{ supplier.phoneNumber }}</td>
-                <td>{{ supplier.website }}</td>
-                <td>
-                    <a href="{{ path('app_supplier_show', {'id': supplier.id}) }}">show</a>
-                    <a href="{{ path('app_supplier_edit', {'id': supplier.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="7">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_supplier_new') }}">Create new</a>
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-muted text-uppercase small">
+                        <tr>
+                            <th class="ps-4">Nom du Fournisseur</th>
+                            <th>Contact Principal</th>
+                            <th>Coordonnées</th>
+                            <th class="text-center">Pièces liées</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for supplier in suppliers %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">{{ supplier.name }}</div>
+                                    {% if supplier.website %}
+                                        <a href="{{ supplier.website }}" target="_blank" class="text-muted small text-decoration-none">
+                                            <i class="bi bi-link-45deg"></i> Site web
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="text-dark">{{ supplier.contactName|default('---') }}</div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <a href="mailto:{{ supplier.email }}" class="text-decoration-none small mb-1">
+                                            <i class="bi bi-envelope me-1"></i> {{ supplier.email }}
+                                        </a>
+                                        <span class="text-muted small">
+                                        <i class="bi bi-telephone me-1"></i> {{ supplier.phoneNumber }}
+                                    </span>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                <span class="badge bg-info-subtle text-info rounded-pill px-3">
+                                    {{ supplier.parts|length }} réf.
+                                </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group shadow-sm">
+                                        <a href="{{ path('app_supplier_show', {'id': supplier.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir détails">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{{ path('app_supplier_edit', {'id': supplier.id}) }}" class="btn btn-sm btn-outline-warning" title="Modifier">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                    Aucun fournisseur enregistré.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

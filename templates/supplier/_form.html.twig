@@ -1,4 +1,57 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+<div class="card border-0 shadow-sm p-4">
+    <div class="row">
+        {# Section Identité #}
+        <div class="col-md-6 border-end">
+            <h5 class="mb-4 text-primary"><i class="bi bi-building me-2"></i>Identité Entreprise</h5>
+            <div class="mb-3">
+                {{ form_row(form.name, {'attr': {'placeholder': 'Ex: Somafic Industrial'}}) }}
+            </div>
+            <div class="mb-3">
+                {{ form_row(form.website, {'attr': {'placeholder': 'https://www.exemple.com'}}) }}
+            </div>
+        </div>
+
+        {# Section Contact #}
+        <div class="col-md-6 ps-md-4">
+            <h5 class="mb-4 text-primary"><i class="bi bi-person-lines-fill me-2"></i>Contact Direct</h5>
+            <div class="mb-3">
+                {{ form_row(form.contactName, {'attr': {'placeholder': 'Nom du commercial'}}) }}
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_row(form.email, {'attr': {'placeholder': 'contact@fournisseur.fr'}}) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_row(form.phoneNumber, {'attr': {'placeholder': '01 23 45 67 89'}}) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    {# Section Notes #}
+    <div class="row">
+        <div class="col-12">
+            <h5 class="mb-3 text-muted">Notes & Informations complémentaires</h5>
+            {{ form_row(form.notes, {
+                'label': false,
+                'attr': {
+                    'placeholder': 'Conditions de paiement, délais habituels, remises accordées...',
+                    'rows': 4
+                }
+            }) }}
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-primary btn-lg flex-grow-1 shadow-sm">
+            <i class="bi bi-check-circle me-2"></i>Enregistrer le Fournisseur
+        </button>
+        <a href="{{ path('app_supplier_index') }}" class="btn btn-outline-secondary btn-lg">Annuler</a>
+    </div>
+</div>
+
+{{ form_rest(form) }}
 {{ form_end(form) }}

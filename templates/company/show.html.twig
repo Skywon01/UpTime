@@ -1,75 +1,90 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Company{% endblock %}
+{% block title %}Profil : {{ company.name }}{% endblock %}
 
 {% block body %}
-    <h1>Company</h1>
-
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ company.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ company.name }}</td>
-            </tr>
-            <tr>
-                <th>Siret</th>
-                <td>{{ company.siret }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_company_index') }}" class="btn btn-primary">Retour à la liste</a>
-
-    <a href="{{ path('app_company_edit', {'id': company.id}) }}" class="btn btn-secondary">Editer</a>
-
-    {{ include('company/_delete_form.html.twig') }}
-
-    <hr class="my-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Parc Machines ({{ company.machines|length }})</h2>
-        <a href="{{ path('app_machine_new', {'company': company.id}) }}" class="btn btn-primary btn-sm">
-            + Ajouter une machine pour ce client
-        </a>
-    </div>
-
-    <div class="row">
-        {% for machine in company.machines %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    {% if machine.imageName %}
-                        <img src="{{ vich_uploader_asset(machine, 'imageFile') }}" class="card-img-top" style="height: 150px; object-fit: cover;">
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ machine.name }}</h5>
-                        <p class="text-muted small">{{ machine.brand }}</p>
-
-                        {# On réutilise ta logique de badge dynamique ici aussi ! #}
-                        {% set en_panne = false %}
-                        {% for intervention in machine.interventions %}
-                            {% if intervention.endedAt is null %}{% set en_panne = true %}{% endif %}
-                        {% endfor %}
-
-                        <span class="badge bg-{{ en_panne ? 'danger' : 'success' }} mb-3">
-                        {{ en_panne ? 'En maintenance' : 'Opérationnelle' }}
-                    </span>
-
-                        <div class="d-grid">
-                            <a href="{{ path('app_machine_show', {'id': machine.id}) }}" class="btn btn-outline-primary btn-sm">
-                                Gérer la machine
-                            </a>
-                        </div>
+    <div class="container-fluid mt-4">
+        {# --- HEADER DE L'ENTREPRISE --- #}
+        <div class="card shadow-sm border-0 mb-5 overflow-hidden">
+            <div class="card-header bg-primary py-3"></div>
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div>
+                        <h1 class="h2 fw-bold mb-1"><i class="bi bi-building me-2"></i>{{ company.name }}</h1>
+                        <p class="text-muted mb-0">SIRET : <span class="fw-bold">{{ company.siret }}</span></p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{{ path('app_company_index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Liste
+                        </a>
+                        <a href="{{ path('app_company_edit', {'id': company.id}) }}" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Modifier
+                        </a>
+                        {{ include('company/_delete_form.html.twig') }}
                     </div>
                 </div>
             </div>
-        {% else %}
-            <div class="col-12">
-                <p class="alert alert-light border">Aucune machine enregistrée pour cette entreprise.</p>
-            </div>
-        {% endfor %}
+        </div>
+
+        {# --- SECTION PARC MACHINES --- #}
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h4 mb-0 fw-bold">Parc Machines ({{ company.machines|length }})</h2>
+            <a href="{{ path('app_machine_new', {'company': company.id}) }}" class="btn btn-primary btn-sm shadow-sm">
+                <i class="bi bi-plus-lg"></i> Ajouter une machine pour ce site
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for machine in company.machines %}
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 overflow-hidden">
+                        {# Image avec hauteur fixe pour harmoniser #}
+                        <div style="height: 180px; overflow: hidden; background: #f8f9fa;">
+                            {% if machine.imageName %}
+                                <img src="{{ vich_uploader_asset(machine, 'imageFile') }}"
+                                     class="w-100 h-100 object-fit-cover"
+                                     alt="{{ machine.name }}">
+                            {% else %}
+                                <img src="https://picsum.photos/seed/{{ machine.id }}/400/250"
+                                     class="w-100 h-100 object-fit-cover opacity-75"
+                                     alt="Image par défaut">
+                            {% endif %}
+                        </div>
+
+                        <div class="card-body">
+                            {# Logique de statut dynamique #}
+                            {% set en_panne = false %}
+                            {% for intervention in machine.interventions %}
+                                {% if intervention.endedAt is null %}{% set en_panne = true %}{% endif %}
+                            {% endfor %}
+
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title h6 fw-bold mb-0">{{ machine.name }}</h5>
+                                <span class="badge rounded-pill bg-{{ en_panne ? 'danger' : 'success' }}-subtle text-{{ en_panne ? 'danger' : 'success' }} border border-{{ en_panne ? 'danger' : 'success' }} x-small">
+                                {{ en_panne ? 'En maintenance' : 'Opérationnelle' }}
+                            </span>
+                            </div>
+                            <p class="text-muted small mb-3">{{ machine.brand }} | SN: {{ machine.serialNumber }}</p>
+
+                            <div class="d-grid">
+                                <a href="{{ path('app_machine_show', {'id': machine.id}) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-gear-fill me-1"></i> Gérer la machine
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-light border border-dashed text-center py-5">
+                        <p class="mb-0 text-muted">Aucune machine enregistrée pour cette entreprise.</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 
+    <style>
+        .x-small { font-size: 0.75rem; }
+    </style>
 {% endblock %}

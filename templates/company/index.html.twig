@@ -1,41 +1,65 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Company index{% endblock %}
+{% block title %}Configuration Entreprise{% endblock %}
 
 {% block body %}
-    <h1 class="mb-5">Liste des entreprises</h1>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0 text-gray-800"><i class="bi bi-building-gear text-primary me-2"></i>Configuration Entreprise</h1>
+            {% if companies|length == 0 %}
+                <a href="{{ path('app_company_new') }}" class="btn btn-primary shadow-sm">
+                    <i class="bi bi-plus-lg"></i> Initialiser mon entreprise
+                </a>
+            {% endif %}
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nom</th>
-                <th>Siret</th>
-                <th>actions</th>
-                <th>Création</th>
-                <th>Mise à jour</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for company in companies %}
-            <tr>
-                <td>{{ company.id }}</td>
-                <td>{{ company.name }}</td>
-                <td>{{ company.siret }}</td>
-                <td>
-                    <a href="{{ path('app_company_show', {'id': company.id}) }}" class="btn btn-primary">Voir</a>
-                    <a href="{{ path('app_company_edit', {'id': company.id}) }}" class="btn btn-secondary">Editer</a>
-                </td>
-                <td>{{ company.createdAt|date('d/m/Y H:i') }}</td>
-                <td>{{ company.updatedAt|date('d/m/Y H:i') }}</td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="4">Pas d'entreprise enregistrée</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        <div class="row">
+            {% for company in companies %}
+                <div class="col-xl-6">
+                    <div class="card shadow-sm border-0 border-start border-primary border-4 mb-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h2 class="h4 fw-bold mb-0">{{ company.name }}</h2>
+                                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">SIRET : {{ company.siret|default('Non renseigné') }}</small>
+                                </div>
+                                <div class="btn-group shadow-sm">
+                                    <a href="{{ path('app_company_show', {'id': company.id}) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_company_edit', {'id': company.id}) }}" class="btn btn-sm btn-outline-warning">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </div>
 
-    <a href="{{ path('app_company_new') }}" class="btn btn-primary">Nouvelle entreprise</a>
+                            <hr>
+
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <p class="text-xs text-muted mb-1">Date de création</p>
+                                    <p class="small fw-bold"><i class="bi bi-calendar-plus me-1"></i> {{ company.createdAt|date('d/m/Y') }}</p>
+                                </div>
+                                <div class="col-6">
+                                    <p class="text-xs text-muted mb-1">Dernière mise à jour</p>
+                                    <p class="small fw-bold"><i class="bi bi-arrow-clockwise me-1"></i> {{ company.updatedAt|date('d/m/Y') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <div class="card shadow-sm border-0 p-5">
+                        <i class="bi bi-building-add fs-1 text-muted mb-3"></i>
+                        <p class="h5 text-muted">Aucune entreprise n'est encore configurée.</p>
+                        <p class="small text-muted mb-4">Configurez votre identité pour personnaliser vos futurs rapports.</p>
+                        <div>
+                            <a href="{{ path('app_company_new') }}" class="btn btn-primary">Commencer la configuration</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 {% endblock %}

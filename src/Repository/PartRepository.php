@@ -16,38 +16,16 @@ class PartRepository extends ServiceEntityRepository
         parent::__construct($registry, Part::class);
     }
 
-    public function findByLowStock(int $limit): array
+    public function findLowStockParts(int $threshold = 5): array
     {
         return $this->createQueryBuilder('p')
-            ->andWhere('p.stockQuantity <= :limit')
-            ->setParameter('limit', $limit)
+            ->andWhere('p.stockQuantity <= :seuil')
+            ->setParameter('seuil', $threshold)
+            ->leftJoin('p.supplier', 's') // On joint le fournisseur pour éviter des requêtes SQL en boucle
+            ->addSelect('s')
             ->orderBy('p.stockQuantity', 'ASC')
             ->getQuery()
             ->getResult();
     }
 
-    //    /**
-    //     * @return Part[] Returns an array of Part objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Part
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }

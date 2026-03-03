@@ -146,8 +146,12 @@
                             <tbody>
                             {% for stat in topMachines %}
                                 <tr>
-                                    <td class="ps-3">{{ stat.name }}</td>
-                                    <td class="text-center"><span class="badge bg-light text-dark">{{ stat.interventionCount }} interventions</span></td>
+                                    <td class="ps-3">{{ stat.machine.name }}</td>
+                                    <td class="text-center">
+            <span class="badge bg-light text-dark">
+                {{ stat.interventionCount }} interventions
+            </span>
+                                    </td>
                                     <td class="text-end pe-3">
                                         {% if stat.interventionCount > 10 %}<span class="text-danger small">● Critique</span>
                                         {% elseif stat.interventionCount > 5 %}<span class="text-warning small">● Modérée</span>

@@ -13,11 +13,16 @@
     <div class="p-3">
         <ul class="nav nav-pills flex-column">
             {% set current_route = app.request.attributes.get('_route') %}
+
+            {# --- SECTION DASHBOARD --- #}
             <li class="nav-item">
-                <a href="{{ path('app_dashboard_index') }}" class="nav-link {{ current_route starts with 'app_dashboard' ? 'active' }}">
+                <a href="{{ path('app_dashboard_index') }}" class="nav-link {{ current_route == 'app_dashboard_index' ? 'active' }}">
                     <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
                 </a>
             </li>
+
+            {# --- SECTION MAINTENANCE --- #}
+            <div class="text-muted small fw-bold text-uppercase px-3 mt-4 mb-2 opacity-50">Maintenance</div>
             <li class="nav-item">
                 <a href="{{ path('app_machine_index') }}" class="nav-link {{ current_route starts with 'app_machine' ? 'active' }}">
                     <i class="bi bi-cpu"></i> <span>Machines</span>
@@ -26,6 +31,27 @@
             <li class="nav-item">
                 <a href="{{ path('app_intervention_index') }}" class="nav-link {{ current_route starts with 'app_intervention' ? 'active' }}">
                     <i class="bi bi-tools"></i> <span>Interventions</span>
+                </a>
+            </li>
+
+            {# --- SECTION LOGISTIQUE --- #}
+            <div class="text-muted small fw-bold text-uppercase px-3 mt-4 mb-2 opacity-50">Gestion & Stocks</div>
+            <li class="nav-item">
+                <a href="{{ path('app_part_index') }}" class="nav-link {{ current_route starts with 'app_part' ? 'active' }}">
+                    <i class="bi bi-box-seam"></i> <span>Pièces détachées</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ path('app_supplier_index') }}" class="nav-link {{ current_route starts with 'app_supplier' ? 'active' }}">
+                    <i class="bi bi-truck"></i> <span>Fournisseurs</span>
+                </a>
+            </li>
+
+            {# --- SECTION PARAMÈTRES (NOUVEAU) --- #}
+            <div class="text-muted small fw-bold text-uppercase px-3 mt-4 mb-2 opacity-50">Configuration</div>
+            <li class="nav-item">
+                <a href="{{ path('app_company_index') }}" class="nav-link {{ current_route starts with 'app_company' ? 'active' }}">
+                    <i class="bi bi-building-gear"></i> <span>Mon Entreprise</span>
                 </a>
             </li>
         </ul>

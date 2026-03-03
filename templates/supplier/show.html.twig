@@ -1,42 +1,90 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Supplier{% endblock %}
+{% block title %}Fournisseur : {{ supplier.name }}{% endblock %}
 
 {% block body %}
-    <h1>Supplier</h1>
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-building text-primary"></i> {{ supplier.name }}</h1>
+            <div>
+                <a href="{{ path('app_supplier_index') }}" class="btn btn-outline-secondary">Retour</a>
+                <a href="{{ path('app_supplier_edit', {'id': supplier.id}) }}" class="btn btn-warning text-white">Modifier</a>
+            </div>
+        </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ supplier.id }}</td>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <td>{{ supplier.name }}</td>
-            </tr>
-            <tr>
-                <th>ContactName</th>
-                <td>{{ supplier.contactName }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ supplier.email }}</td>
-            </tr>
-            <tr>
-                <th>PhoneNumber</th>
-                <td>{{ supplier.phoneNumber }}</td>
-            </tr>
-            <tr>
-                <th>Website</th>
-                <td>{{ supplier.website }}</td>
-            </tr>
-        </tbody>
-    </table>
+        <div class="row">
+            {# Colonne Infos Contact #}
+            <div class="col-lg-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white fw-bold">Coordonnées</div>
+                    <div class="card-body">
+                        <p class="mb-2"><strong>Contact :</strong> {{ supplier.contactName|default('Non renseigné') }}</p>
+                        <p class="mb-2">
+                            <i class="bi bi-envelope me-2"></i>
+                            <a href="mailto:{{ supplier.email }}">{{ supplier.email }}</a>
+                        </p>
+                        <p class="mb-2">
+                            <i class="bi bi-telephone me-2"></i>
+                            {{ supplier.phoneNumber }}
+                        </p>
+                        {% if supplier.website %}
+                            <p class="mb-2">
+                                <i class="bi bi-globe me-2"></i>
+                                <a href="{{ supplier.website }}" target="_blank">{{ supplier.website }}</a>
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
 
-    <a href="{{ path('app_supplier_index') }}">back to list</a>
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white fw-bold">Notes internes</div>
+                    <div class="card-body">
+                        {{ supplier.notes|nl2br|default('Aucune note.') }}
+                    </div>
+                </div>
+            </div>
 
-    <a href="{{ path('app_supplier_edit', {'id': supplier.id}) }}">edit</a>
-
-    {{ include('supplier/_delete_form.html.twig') }}
+            {# Colonne Catalogue Pièces #}
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Catalogue de pièces</span>
+                        <span class="badge bg-primary">{{ supplier.parts|length }} références</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Référence/Désignation</th>
+                                <th class="text-center">Stock</th>
+                                <th class="text-end">Prix Unit.</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for part in supplier.parts %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ path('app_part_show', {id: part.id}) }}" class="fw-bold text-decoration-none">
+                                            {{ part.designation }}
+                                        </a>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge {{ part.stockQuantity < 5 ? 'bg-danger' : 'bg-success' }}">
+                                            {{ part.stockQuantity }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">{{ part.price|number_format(2, ',', ' ') }} €</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted">Ce fournisseur ne propose aucune pièce pour le moment.</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

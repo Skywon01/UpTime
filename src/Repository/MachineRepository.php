@@ -16,28 +16,45 @@ class MachineRepository extends ServiceEntityRepository
         parent::__construct($registry, Machine::class);
     }
 
-    //    /**
-    //     * @return Machine[] Returns an array of Machine objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('m')
-    //            ->andWhere('m.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('m.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findTopMachines(int $limit = 5): array
+    {
+        return $this->createQueryBuilder('m')
+            ->leftJoin('m.interventions', 'i')
+            ->select('m as machine', 'COUNT(i.id) as interventionCount')
+            ->groupBy('m.id')
+            ->orderBy('interventionCount', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Machine
-    //    {
-    //        return $this->createQueryBuilder('m')
-    //            ->andWhere('m.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Machines ayant une maintenance prévue dans les 7 prochains jours
+     */
+    public function findUpcomingMaintenances(int $days = 7): array
+    {
+        $now = new \DateTimeImmutable();
+        $nextLimit = $now->modify('+' . $days . ' days');
+
+        return $this->createQueryBuilder('m')
+            ->where('m.nextMaintenanceAt BETWEEN :now AND :nextLimit')
+            ->setParameter('now', $now)
+            ->setParameter('nextLimit', $nextLimit)
+            ->orderBy('m.nextMaintenanceAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Machines dont la date de maintenance est dépassée
+     */
+    public function findLateMaintenances(): array
+    {
+        return $this->createQueryBuilder('m')
+            ->where('m.nextMaintenanceAt < :now')
+            ->setParameter('now', new \DateTimeImmutable())
+            ->orderBy('m.nextMaintenanceAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

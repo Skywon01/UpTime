@@ -107,12 +107,39 @@ final class InterventionController extends AbstractController
     #[Route('/{id}/close', name: 'app_intervention_close', methods: ['POST', 'GET'])]
     public function close(Intervention $intervention, EntityManagerInterface $entityManager): Response
     {
-        // On ne remplit endedAt que s'il est vide
         if (!$intervention->getEndedAt()) {
+
+            // --- 1. ÉTAPE DE VÉRIFICATION ---
+            foreach ($intervention->getInterventionConsumedParts() as $consumedPart) {
+                $part = $consumedPart->getPart();
+                $quantityNeeded = $consumedPart->getQuantity();
+
+                if ($part && $part->getStockQuantity() < $quantityNeeded) {
+                    // ALERTE : Stock insuffisant !
+                    $this->addFlash('danger', sprintf(
+                        'Impossible de clôturer : Stock insuffisant pour la pièce "%s" (Disponible : %d, Requis : %d)',
+                        $part->getDesignation(),
+                        $part->getStockQuantity(),
+                        $quantityNeeded
+                    ));
+
+                    // On redirige vers l'édition pour que le tech puisse corriger
+                    return $this->redirectToRoute('app_intervention_edit', ['id' => $intervention->getId()]);
+                }
+            }
+
+            // --- 2. ÉTAPE DE DÉSTOCKAGE (si tout est OK) ---
+            foreach ($intervention->getInterventionConsumedParts() as $consumedPart) {
+                $part = $consumedPart->getPart();
+                if ($part) {
+                    $part->setStockQuantity($part->getStockQuantity() - $consumedPart->getQuantity());
+                }
+            }
+
             $intervention->setEndedAt(new \DateTimeImmutable());
             $entityManager->flush();
 
-            $this->addFlash('success', 'Intervention terminée avec succès !');
+            $this->addFlash('success', 'Intervention clôturée et stocks mis à jour !');
         }
 
         return $this->redirectToRoute('app_machine_show', ['id' => $intervention->getMachine()->getId()]);

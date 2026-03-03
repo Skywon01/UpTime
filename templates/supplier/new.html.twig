@@ -1,11 +1,19 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Supplier{% endblock %}
+{% block title %}Nouveau Fournisseur{% endblock %}
 
 {% block body %}
-    <h1>Create new Supplier</h1>
+    <div class="container mt-4" style="max-width: 900px;">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('app_dashboard_index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('app_supplier_index') }}">Fournisseurs</a></li>
+                <li class="breadcrumb-item active">Ajout</li>
+            </ol>
+        </nav>
 
-    {{ include('supplier/_form.html.twig') }}
+        <h1 class="h2 mb-4 fw-bold text-dark">Ajouter un partenaire fournisseur</h1>
 
-    <a href="{{ path('app_supplier_index') }}">back to list</a>
+        {{ include('supplier/_form.html.twig') }}
+    </div>
 {% endblock %}

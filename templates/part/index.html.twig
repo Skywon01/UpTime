@@ -1,41 +1,81 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Part index{% endblock %}
+{% block title %}Inventaire des Pièces{% endblock %}
 
 {% block body %}
-    <h1>Part index</h1>
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3"><i class="bi bi-box-seam text-primary me-2"></i>Inventaire des Pièces</h1>
+            <a href="{{ path('app_part_new') }}" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-lg"></i> Ajouter une référence
+            </a>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Reference</th>
-                <th>Designation</th>
-                <th>Price</th>
-                <th>StockQuantity</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for part in parts %}
-            <tr>
-                <td>{{ part.id }}</td>
-                <td>{{ part.reference }}</td>
-                <td>{{ part.designation }}</td>
-                <td>{{ part.price }}</td>
-                <td>{{ part.stockQuantity }}</td>
-                <td>
-                    <a href="{{ path('app_part_show', {'id': part.id}) }}">show</a>
-                    <a href="{{ path('app_part_edit', {'id': part.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_part_new') }}">Create new</a>
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-muted text-uppercase small">
+                        <tr>
+                            <th class="ps-4">Référence & Désignation</th>
+                            <th>Fournisseur</th>
+                            <th class="text-center">Stock</th>
+                            <th class="text-end">Prix Unit. HT</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for part in parts %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">{{ part.designation }}</div>
+                                    <code class="text-muted small">{{ part.reference }}</code>
+                                </td>
+                                <td>
+                                    {% if part.supplier %}
+                                        <span class="text-dark small">
+                                        <i class="bi bi-truck me-1"></i> {{ part.supplier.name }}
+                                    </span>
+                                    {% else %}
+                                        <span class="text-muted small italic">Non assigné</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {# Gestion visuelle des stocks #}
+                                    {% if part.stockQuantity <= 0 %}
+                                        <span class="badge bg-danger rounded-pill">Rupture</span>
+                                    {% elseif part.stockQuantity <= 5 %}
+                                        <span class="badge bg-warning text-dark rounded-pill">{{ part.stockQuantity }} (Bas)</span>
+                                    {% else %}
+                                        <span class="badge bg-success rounded-pill">{{ part.stockQuantity }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end fw-bold">
+                                    {{ part.price|number_format(2, ',', ' ') }} €
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group shadow-sm">
+                                        <a href="{{ path('app_part_show', {'id': part.id}) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{{ path('app_part_edit', {'id': part.id}) }}" class="btn btn-sm btn-outline-warning">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-search fs-1 d-block mb-3"></i>
+                                    Aucune pièce en stock.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
