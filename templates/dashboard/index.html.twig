@@ -4,6 +4,17 @@
     <div class="container-fluid mt-4">
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <h1 class="h3 mb-0 text-gray-800">Tableau de bord <span class="text-primary fw-light">| UpTime</span></h1>
+            <div class="alert alert-info border-0 shadow-sm d-flex align-items-center mb-4" role="alert">
+                <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+                <div>
+                    <strong>État de la flotte :</strong>
+                    {% if brokenMachines > 0 %}
+                        Il y a <span class="badge bg-danger">{{ brokenMachines }} machines</span> à l'arrêt. Priorité absolue sur les interventions en cours.
+                    {% else %}
+                        Toutes les machines critiques sont opérationnelles. Focus sur le <strong>préventif</strong> !
+                    {% endif %}
+                </div>
+            </div>
             <div class="d-flex gap-2">
                 <a href="{{ path('app_intervention_new') }}" class="btn btn-primary shadow-sm">
                     <i class="bi bi-plus-lg"></i> <span class="d-none d-md-inline">Nouvelle Intervention</span>
@@ -171,11 +182,18 @@
                         <h6 class="m-0 fw-bold text-info">Agenda Préventif</h6>
                     </div>
                     <div class="card-body">
-                        {% for machine in upcomingMaintenances %}
-                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
-                                <span class="small fw-bold">{{ machine.name }}</span>
-                                <span class="badge bg-info">{{ machine.nextMaintenanceAt|date('d/m/Y') }}</span>
-                            </div>
+                        {% for machine in lateMaintenances %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ machine.name }}</span>
+                                <div>
+                                    <span class="badge bg-danger-soft text-danger me-2">Retard</span>
+                                    {# Lien qui envoie vers la création d'intervention avec l'ID machine #}
+                                    <a href="{{ path('app_intervention_new', {'machine': machine.id, 'type': 'preventive'}) }}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-calendar-plus"></i> Planifier
+                                    </a>
+                                </div>
+                            </li>
                         {% endfor %}
                     </div>
                 </div>

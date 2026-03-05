@@ -26,4 +26,40 @@ class InterventionRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    public function getAverageRepairTime(): float
+    {
+        $qb = $this->createQueryBuilder('i')
+            ->select('AVG(DATE_DIFF(i.endedAt, i.createdAt))')
+            ->where('i.endedAt IS NOT NULL');
+
+        return (float) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    public function findFilteredInterventions(?int $machineId, ?string $status, ?string $type): array
+    {
+        $qb = $this->createQueryBuilder('i')
+            ->orderBy('i.createdAt', 'DESC');
+
+        // Filtre par Machine
+        if ($machineId) {
+            $qb->andWhere('i.machine = :machineId')
+                ->setParameter('machineId', $machineId);
+        }
+
+        // Filtre par Statut
+        if ($status === 'active') {
+            $qb->andWhere('i.endedAt IS NULL');
+        } elseif ($status === 'finished') {
+            $qb->andWhere('i.endedAt IS NOT NULL');
+        }
+
+        // Filtre par Type
+        if ($type) {
+            $qb->andWhere('i.type = :type')
+                ->setParameter('type', $type);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

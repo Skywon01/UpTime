@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Color\Color;
 use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\Exception\ValidationException;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
@@ -89,6 +90,9 @@ final class MachineController extends AbstractController
         return $this->redirectToRoute('app_machine_index', [], Response::HTTP_SEE_OTHER);
     }
 
+    /**
+     * @throws ValidationException
+     */
     #[Route('/{id}/qrcode', name: 'app_machine_qr_code', methods: ['GET'])]
     public function generateQrCode(Machine $machine, Request $request): Response
     {
@@ -120,6 +124,21 @@ final class MachineController extends AbstractController
             200,
             ['Content-Type' => $result->getMimeType()]
         );
+    }
+
+    #[Route('/planning-preventif', name: 'app_preventive_index')]
+    public function preventiveIndex(MachineRepository $machineRepository): Response
+    {
+        // On récupère toutes les machines qui ont une date de maintenance prévue
+        $machines = $machineRepository->createQueryBuilder('m')
+            ->where('m.nextMaintenanceAt IS NOT NULL')
+            ->orderBy('m.nextMaintenanceAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('machine/preventive_list.html.twig', [
+            'machines' => $machines,
+        ]);
     }
 
 

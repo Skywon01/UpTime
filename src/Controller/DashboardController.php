@@ -39,4 +39,35 @@ final class DashboardController extends AbstractController
         ]);
 
     }
+
+    /**
+     * Machines dont la maintenance est dépassée (Date < Aujourd'hui)
+     */
+    public function findLateMaintenances(): array
+    {
+        return $this->createQueryBuilder('m')
+            ->where('m.nextMaintenanceAt < :now')
+            ->setParameter('now', new \DateTimeImmutable())
+            ->orderBy('m.nextMaintenanceAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Machines dont la maintenance arrive bientôt (entre aujourd'hui et +15 jours)
+     */
+    public function findUpcomingMaintenances(): array
+    {
+        $now = new \DateTimeImmutable();
+        $limit = $now->modify('+15 days');
+
+        return $this->createQueryBuilder('m')
+            ->where('m.nextMaintenanceAt >= :now')
+            ->andWhere('m.nextMaintenanceAt <= :limit')
+            ->setParameter('now', $now)
+            ->setParameter('limit', $limit)
+            ->orderBy('m.nextMaintenanceAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

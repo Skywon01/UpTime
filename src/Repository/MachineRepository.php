@@ -19,8 +19,8 @@ class MachineRepository extends ServiceEntityRepository
     public function findTopMachines(int $limit = 5): array
     {
         return $this->createQueryBuilder('m')
+            ->select('m as machine, COUNT(i.id) as interventionCount')
             ->leftJoin('m.interventions', 'i')
-            ->select('m as machine', 'COUNT(i.id) as interventionCount')
             ->groupBy('m.id')
             ->orderBy('interventionCount', 'DESC')
             ->setMaxResults($limit)

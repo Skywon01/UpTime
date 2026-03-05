@@ -63,6 +63,9 @@ class Machine
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $nextMaintenanceAt = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $maintenanceFrequencyDays = null;
+
 
     public function __construct()
     {
@@ -268,5 +271,39 @@ class Machine
         }
 
         return $this->nextMaintenanceAt < new \DateTimeImmutable();
+    }
+
+    public function getMaintenanceFrequencyDays(): ?int
+    {
+        return $this->maintenanceFrequencyDays;
+    }
+
+    public function setMaintenanceFrequencyDays(?int $maintenanceFrequencyDays): static
+    {
+        $this->maintenanceFrequencyDays = $maintenanceFrequencyDays;
+
+        return $this;
+    }
+
+    public function getMaintenanceStatus(): string
+    {
+        if (null === $this->nextMaintenanceAt) {
+            return 'UNKNOWN'; // Pas de maintenance prévue
+        }
+
+        $now = new \DateTimeImmutable();
+        $diff = $now->diff($this->nextMaintenanceAt);
+        $isPast = $this->nextMaintenanceAt < $now;
+
+        if ($isPast) {
+            return 'LATE'; // C'est rouge 🔴
+        }
+
+        // Si c'est dans moins de 15 jours
+        if ($diff->days <= 15) {
+            return 'WARNING'; // C'est orange 🟠
+        }
+
+        return 'OK'; // C'est vert 🟢
     }
 }

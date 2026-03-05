@@ -18,10 +18,26 @@ use Symfony\Component\Routing\Attribute\Route;
 final class InterventionController extends AbstractController
 {
     #[Route(name: 'app_intervention_index', methods: ['GET'])]
-    public function index(InterventionRepository $interventionRepository): Response
+    public function index(Request $request, InterventionRepository $interventionRepository, EntityManagerInterface $entityManager): Response
     {
+        // 1. On récupère TOUS les filtres potentiels de l'URL
+        $machineId = $request->query->get('machine');
+        $status = $request->query->get('status'); // 'active' ou 'finished'
+        $type = $request->query->get('type');     // 'Correctif' ou 'Préventif'
+
+        $machine = null;
+        if ($machineId) {
+            $machine = $entityManager->getRepository(Machine::class)->find($machineId);
+        }
+
+        // 2. On utilise notre méthode de repository (à créer juste après)
+        $interventions = $interventionRepository->findFilteredInterventions($machineId, $status, $type);
+
         return $this->render('intervention/index.html.twig', [
-            'interventions' => $interventionRepository->findAll(),
+            'interventions' => $interventions,
+            'selectedMachine' => $machine,
+            'currentStatus' => $status,
+            'currentType' => $type,
         ]);
     }
 
@@ -35,6 +51,12 @@ final class InterventionController extends AbstractController
             $machine = $entityManager->getRepository(Machine::class)->find($machineId);
             if ($machine) {
                 $intervention->setMachine($machine);
+            }
+
+            // Si c'est du préventif, on pré-remplit la description
+            if ($request->query->get('type') === 'preventive') {
+                $intervention->setType(Intervention::TYPE_PREVENTIVE);
+                $intervention->setDescription('Maintenance préventive périodique selon planning.');
             }
         }
 
@@ -68,6 +90,7 @@ final class InterventionController extends AbstractController
             'intervention' => $intervention,
             'form' => $form,
         ]);
+
     }
 
     #[Route('/{id}', name: 'app_intervention_show', methods: ['GET'])]
@@ -106,6 +129,10 @@ final class InterventionController extends AbstractController
 
         return $this->redirectToRoute('app_intervention_index', [], Response::HTTP_SEE_OTHER);
     }
+
+    /**
+     * @throws \DateMalformedStringException
+     */
     #[Route('/{id}/close', name: 'app_intervention_close', methods: ['POST', 'GET'])]
     public function close(Intervention $intervention, EntityManagerInterface $entityManager): Response
     {
@@ -138,10 +165,23 @@ final class InterventionController extends AbstractController
                 }
             }
 
+            // --- 3. MISE À JOUR DU PRÉVENTIF ---
+            $machine = $intervention->getMachine();
+
+            // Si la machine a une fréquence de maintenance définie (en jours)
+            if ($machine && $machine->getMaintenanceFrequencyDays()) {
+                $today = new \DateTimeImmutable();
+                // On calcule la prochaine date : aujourd'hui + la fréquence
+                $nextDate = $today->modify('+' . $machine->getMaintenanceFrequencyDays() . ' days');
+
+                $machine->setNextMaintenanceAt($nextDate);
+                // Pas besoin de persist($machine) car elle est déjà "managed" par Doctrine via l'intervention
+            }
+
             $intervention->setEndedAt(new \DateTimeImmutable());
             $entityManager->flush();
 
-            $this->addFlash('success', 'Intervention clôturée et stocks mis à jour !');
+            $this->addFlash('success', 'Intervention clôturée, stocks et prochaines maintenances mis à jour !');
         }
 
         return $this->redirectToRoute('app_machine_show', ['id' => $intervention->getMachine()->getId()]);
