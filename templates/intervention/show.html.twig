@@ -82,7 +82,9 @@
                         </div>
                     </div>
                 </div>
-
+                <a href="{{ path('app_intervention_pdf', {'id': intervention.id}) }}" class="btn btn-danger" target="_blank">
+                    <i class="bi bi-file-earmark-pdf"></i> Imprimer le Bon
+                </a>
                 <div class="mt-4 d-grid">
                     <a href="{{ path('app_intervention_index') }}" class="btn btn-link text-muted">
                         <i class="bi bi-arrow-left"></i> Retour à la liste

@@ -7,6 +7,8 @@ use App\Entity\Machine;
 use App\Form\InterventionType;
 use App\Repository\InterventionRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -143,5 +145,37 @@ final class InterventionController extends AbstractController
         }
 
         return $this->redirectToRoute('app_machine_show', ['id' => $intervention->getMachine()->getId()]);
+    }
+
+    #[Route('/{id}/pdf', name: 'app_intervention_pdf', methods: ['GET'])]
+    public function generatePdf(Intervention $intervention): Response
+    {
+        // Configure Dompdf
+        $pdfOptions = new Options();
+        $pdfOptions->set('defaultFont', 'Arial');
+        $pdfOptions->set('isHtml5ParserEnabled', true);
+
+        // Initialise Dompdf
+        $dompdf = new Dompdf($pdfOptions);
+
+        // Génère le HTML à partir du Twig
+        $html = $this->renderView('intervention/pdf.html.twig', [
+            'intervention' => $intervention,
+        ]);
+
+        // Charge le HTML dans Dompdf
+        $dompdf->loadHtml($html);
+
+        // (Optionnel) Taille du papier et orientation
+        $dompdf->setPaper('A4', 'portrait');
+
+        // Rendu du PDF
+        $dompdf->render();
+
+        // Envoi du PDF au navigateur
+        return new Response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="intervention-'.$intervention->getId().'.pdf"'
+        ]);
     }
 }
