@@ -131,7 +131,50 @@
 
         {# --- VERSION MOBILE --- #}
         <div class="d-md-none">
-            {# ... (ta logique mobile est déjà très bien, pense juste à ajouter le type si besoin) ... #}
+            {% for intervention in interventions %}
+                <div class="card mb-3 shadow-sm border-0 border-start border-4 {{ intervention.endedAt ? 'border-success' : 'border-warning' }}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <a href="{{ path('app_intervention_index', {'machine': intervention.machine.id}) }}" class="text-decoration-none">
+                                <span class="badge bg-primary-subtle text-primary">{{ intervention.machine ? intervention.machine.name : 'N/A' }}</span>
+                            </a>
+                            {% if intervention.endedAt %}
+                                <small class="text-muted"><i class="bi bi-check-circle text-success"></i> Terminé</small>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">En cours</span>
+                            {% endif %}
+                        </div>
+
+                        <h5 class="card-title h6 fw-bold mb-1">{{ intervention.title }}</h5>
+                        <div class="small text-muted mb-3"><i class="bi bi-calendar3"></i> {{ intervention.createdAt|date('d/m/Y') }}</div>
+
+                        <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded">
+                            <span class="small fw-bold text-success">{{ intervention.TotalPartsCost|number_format(2, ',', ' ') }} €</span>
+                            <div class="btn-group">
+                                <a href="{{ path('app_intervention_show', {'id': intervention.id}) }}" class="btn btn-sm btn-primary">Voir</a>
+                                <a href="{{ path('app_intervention_edit', {'id': intervention.id}) }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-tools fs-1 text-muted"></i>
+                    <p class="mt-3">Aucune intervention enregistrée.</p>
+                </div>
+            {% endfor %}
         </div>
     </div>
+
+    <style>
+        /* Petite animation subtile pour l'indicateur "En cours" */
+        .animate-pulse {
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
 {% endblock %}

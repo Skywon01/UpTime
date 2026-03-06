@@ -1,0 +1,148 @@
+{# templates/dashboard/stats.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques Maintenance{% endblock %}
+
+{% block body %}
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0 text-gray-800"><i class="bi bi-speedometer2 me-2"></i>Performance Maintenance</h1>
+            <span class="badge bg-light text-dark border px-3 py-2">Total Historique</span>
+        </div>
+
+        {# --- LES COMPTEURS (KPIs) --- #}
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm border-start border-4 border-primary h-100">
+                    <div class="card-body">
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Coût Total Réel</div>
+                        <div class="h4 mb-0 fw-bold">{{ totalGlobalCost|number_format(2, ',', ' ') }} €</div>
+                        <small class="text-muted">Pièces + MO + Arrêt</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm border-start border-4 border-success h-100">
+                    <div class="card-body">
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Taux de Préventif</div>
+                        <div class="h4 mb-0 fw-bold text-success">{{ preventiveRate }} %</div>
+                        <div class="progress mt-2" style="height: 6px;">
+                            <div class="progress-bar bg-success" style="width: {{ preventiveRate }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm border-start border-4 border-info h-100">
+                    <div class="card-body">
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Temps d'Arrêt Total</div>
+                        <div class="h4 mb-0 fw-bold text-info">{{ totalHours|round(1) }} h</div>
+                        <small class="text-muted">Cumulé sur {{ interventionCount }} int.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm border-start border-4 border-warning h-100">
+                    <div class="card-body">
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Productivité Tech</div>
+                        <div class="h4 mb-0 fw-bold text-warning">
+                            {% set avg = interventionCount > 0 ? (totalHours / interventionCount)|round(1) : 0 %}
+                            {{ avg }} h <span class="fs-6 fw-normal text-muted">/ int.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# --- LES GRAPHIQUES --- #}
+        <div class="row g-4">
+            {# Graphique 1 : Ratio Type d'Intervention #}
+            <div class="col-12 col-lg-5">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white fw-bold py-3">Répartition Préventif / Correctif</div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <div style="width: 100%; max-width: 300px;">
+                            <canvas id="typeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Graphique 2 : Top 5 Machines coûteuses #}
+            <div class="col-12 col-lg-7">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white fw-bold py-3">Top 5 Machines (Coût Réel Global)</div>
+                    <div class="card-body">
+                        <canvas id="machineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Import de Chart.js via CDN #}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Configuration du graphique en camembert
+        const ctxType = document.getElementById('typeChart');
+        new Chart(ctxType, {
+            type: 'doughnut',
+            data: {
+                labels: [{% for stat in statsType %}'{{ stat.type }}',{% endfor %}],
+                datasets: [{
+                    data: [{% for stat in statsType %}{{ stat.nombre }},{% endfor %}],
+                    backgroundColor: ['#0dcaf0', '#6c757d', '#ffc107'],
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Configuration du graphique Top Machines (Coût Réel)
+        const ctxMachine = document.getElementById('machineChart');
+        new Chart(ctxMachine, {
+            type: 'bar',
+            data: {
+                labels: [{% for name, cost in topMachines %}'{{ name }}',{% endfor %}],
+                datasets: [{
+                    label: 'Coût Total Réel (€)',
+                    data: [{% for name, cost in topMachines %}{{ cost }},{% endfor %}],
+                    backgroundColor: '#dc3545',
+                    borderColor: '#a52834',
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Euros (€)' },
+                        grid: { display: false }
+                    },
+                    x: { grid: { display: false } }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Coût total: ' + context.parsed.y.toLocaleString('fr-FR') + ' €';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}

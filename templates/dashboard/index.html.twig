@@ -16,6 +16,10 @@
                 </div>
             </div>
             <div class="d-flex gap-2">
+                <a href="{{ path('app_stats') }}" class="btn btn-outline-primary shadow-sm">
+                    <i class="bi bi-graph-up-arrow"></i> <span class="d-none d-md-inline">Analyses & Coûts</span>
+                </a>
+
                 <a href="{{ path('app_intervention_new') }}" class="btn btn-primary shadow-sm">
                     <i class="bi bi-plus-lg"></i> <span class="d-none d-md-inline">Nouvelle Intervention</span>
                 </a>
@@ -42,20 +46,23 @@
             </div>
 
             <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card border-0 shadow-sm border-start border-success border-4 h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Coût Total</div>
-                                <div class="h4 mb-0 fw-bold text-dark">{{ totalCost|number_format(0, ',', ' ') }} €</div>
+                <a href="{{ path('app_stats') }}" class="text-decoration-none h-100">
+                    <div class="card border-0 shadow-sm border-start border-success border-4 h-100 hover-card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Coût Total</div>
+                                    <div class="h4 mb-0 fw-bold text-dark">{{ totalCost|number_format(0, ',', ' ') }} €</div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-center rounded-circle bg-success-subtle"
+                                     style="width: 48px; height: 48px; flex-shrink: 0;">
+                                    <i class="bi bi-currency-euro text-success fs-4"></i>
+                                </div>
                             </div>
-                            <div class="d-flex align-items-center justify-content-center rounded-circle bg-success-subtle"
-                                 style="width: 48px; height: 48px; flex-shrink: 0;">
-                                <i class="bi bi-currency-euro text-success fs-4"></i>
-                            </div>
+                            <div class="mt-2 text-xs text-muted">Voir le détail <i class="bi bi-chevron-right"></i></div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
 
             <div class="col-12 col-sm-6 col-xl-3">
@@ -206,5 +213,10 @@
         .bg-danger-soft { background-color: #fceaea; }
         .text-xs { font-size: 0.75rem; }
         .border-4 { border-width: 4px !important; }
+        .hover-card:hover {
+            background-color: #f8f9fa;
+            transition: 0.3s;
+            transform: translateY(-2px);
+        }
     </style>
 {% endblock %}

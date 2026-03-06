@@ -51,12 +51,13 @@
             </div>
 
             <div class="col-12 col-lg-4">
-                <div class="card shadow-sm border-0 bg-light">
+                <div class="card shadow-sm border-0 bg-light mb-4">
                     <div class="card-body">
-                        <h5 class="card-title mb-4">Statut & Bilan</h5>
+                        <h5 class="card-title mb-4">Statut & Bilan Financier</h5>
 
                         <div class="d-grid gap-3">
-                            <div class="p-3 bg-white rounded border">
+                            {# --- BLOC TEMPS --- #}
+                            <div class="p-3 bg-white rounded border shadow-sm">
                                 <label class="text-muted small text-uppercase fw-bold d-block mb-1">Temps passé</label>
                                 {% if intervention.endedAt %}
                                     {% set diff = intervention.endedAt.diff(intervention.createdAt) %}
@@ -73,20 +74,52 @@
                                 {% endif %}
                             </div>
 
-                            <div class="p-3 bg-white rounded border">
-                                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Coût des pièces</label>
-                                <h4 class="mb-0 text-success">
-                                    <i class="bi bi-currency-euro"></i> {{ intervention.TotalPartsCost|number_format(2, ',', ' ') }} €
-                                </h4>
+                            {# --- BLOC DÉTAILS DES COÛTS --- #}
+                            <div class="p-3 bg-white rounded border shadow-sm">
+                                <label class="text-muted small text-uppercase fw-bold d-block mb-3 border-bottom pb-1">Récapitulatif des frais</label>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Pièces détachées</span>
+                                    <span class="fw-bold text-success">{{ intervention.TotalPartsCost|number_format(2, ',', ' ') }} €</span>
+                                </div>
+
+                                {# Affichage Main d'oeuvre si taux renseigné #}
+                                {% if intervention.technician and intervention.technician.hourlyRate > 0 %}
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Main d'œuvre <small>({{ intervention.technician.hourlyRate }}€/h)</small></span>
+                                        <span class="fw-bold">{{ intervention.TotalLaborCost|number_format(2, ',', ' ') }} €</span>
+                                    </div>
+                                {% endif %}
+
+                                {# Affichage Coût d'arrêt si taux renseigné #}
+                                {% if intervention.machine and intervention.machine.hourlyDowntimeCost > 0 %}
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted text-danger">Coût d'arrêt machine</span>
+                                        <span class="fw-bold text-danger">{{ intervention.TotalDowntimeCost|number_format(2, ',', ' ') }} €</span>
+                                    </div>
+                                {% endif %}
+
+                                <hr>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="h6 fw-bold mb-0">TOTAL</span>
+                                    <span class="h4 fw-bold mb-0 text-dark">
+                            {# Ici on fait la somme totale (on peut aussi créer une méthode getTotalCost() dans l'entité) #}
+                                        {% set total = intervention.TotalPartsCost + intervention.TotalLaborCost + intervention.TotalDowntimeCost %}
+                                        {{ total|number_format(2, ',', ' ') }} €
+                        </span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <a href="{{ path('app_intervention_pdf', {'id': intervention.id}) }}" class="btn btn-danger" target="_blank">
-                    <i class="bi bi-file-earmark-pdf"></i> Imprimer le Bon
-                </a>
-                <div class="mt-4 d-grid">
-                    <a href="{{ path('app_intervention_index') }}" class="btn btn-link text-muted">
+
+                {# --- BOUTONS D'ACTION --- #}
+                <div class="d-grid gap-2">
+                    <a href="{{ path('app_intervention_pdf', {'id': intervention.id}) }}" class="btn btn-danger py-2" target="_blank">
+                        <i class="bi bi-file-earmark-pdf"></i> Imprimer le Bon d'intervention
+                    </a>
+                    <a href="{{ path('app_intervention_index') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left"></i> Retour à la liste
                     </a>
                 </div>

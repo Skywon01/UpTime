@@ -40,6 +40,61 @@ final class DashboardController extends AbstractController
 
     }
 
+    // src/Controller/DashboardController.php
+
+    #[Route('/stats', name: 'app_stats')]
+    public function stats(InterventionRepository $repo): Response
+    {
+        $interventions = $repo->findAll();
+
+        $totalGlobalCost = 0;
+        $totalHours = 0;
+        $interventionCount = count($interventions);
+        $preventiveCount = 0;
+
+        $machineCosts = [];
+
+        foreach ($interventions as $intervention) {
+            // Calcul du coût réel par intervention
+            $cost = $intervention->getTotalPartsCost()
+                + $intervention->getTotalLaborCost()
+                + $intervention->getTotalDowntimeCost();
+
+            $totalGlobalCost += $cost;
+            $totalHours += $intervention->getDurationInHours();
+
+            if ($intervention->getType() === 'Préventif') {
+                $preventiveCount++;
+            }
+
+            // Top 5 Machines logic
+            $name = $intervention->getMachine() ? $intervention->getMachine()->getName() : 'N/A';
+            $machineCosts[$name] = ($machineCosts[$name] ?? 0) + $cost;
+        }
+
+        arsort($machineCosts);
+        $topMachines = array_slice($machineCosts, 0, 5);
+
+        // Ratio préventif en %
+        $preventiveRate = $interventionCount > 0 ? round(($preventiveCount / $interventionCount) * 100) : 0;
+
+        $statsType = $repo->createQueryBuilder('i')
+            ->select('i.type, COUNT(i.id) as nombre')
+            ->groupBy('i.type')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('dashboard/stats.html.twig', [
+            'totalGlobalCost' => $totalGlobalCost,
+            'totalHours' => $totalHours,
+            'interventionCount' => $interventionCount,
+            'preventiveRate' => $preventiveRate,
+            'topMachines' => $topMachines,
+            'statsType' => $statsType,
+            // ... (tes autres variables pour les charts)
+        ]);
+    }
+
     /**
      * Machines dont la maintenance est dépassée (Date < Aujourd'hui)
      */
@@ -55,6 +110,7 @@ final class DashboardController extends AbstractController
 
     /**
      * Machines dont la maintenance arrive bientôt (entre aujourd'hui et +15 jours)
+     * @throws \DateMalformedStringException
      */
     public function findUpcomingMaintenances(): array
     {

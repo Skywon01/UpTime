@@ -43,6 +43,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Intervention::class, mappedBy: 'technician')]
     private Collection $interventions;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $hourlyRate = null;
+
     public function __construct()
     {
         $this->interventions = new ArrayCollection();
@@ -161,6 +164,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $intervention->setTechnician(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getHourlyRate(): ?float
+    {
+        return $this->hourlyRate;
+    }
+
+    public function setHourlyRate(?float $hourlyRate): static
+    {
+        $this->hourlyRate = $hourlyRate;
 
         return $this;
     }

@@ -66,6 +66,9 @@ class Machine
     #[ORM\Column(nullable: true)]
     private ?int $maintenanceFrequencyDays = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $hourlyDowntimeCost = null;
+
 
     public function __construct()
     {
@@ -305,5 +308,17 @@ class Machine
         }
 
         return 'OK'; // C'est vert 🟢
+    }
+
+    public function getHourlyDowntimeCost(): ?float
+    {
+        return $this->hourlyDowntimeCost;
+    }
+
+    public function setHourlyDowntimeCost(?float $hourlyDowntimeCost): static
+    {
+        $this->hourlyDowntimeCost = $hourlyDowntimeCost;
+
+        return $this;
     }
 }

@@ -219,4 +219,49 @@ class Intervention
 
         return round($hours, 2);
     }
+
+    public function getTotalCostDetails(): array
+    {
+        $details = [
+            'parts' => $this->getTotalPartsCost(),
+            'labor' => 0,
+            'downtime' => 0,
+            'total' => 0
+        ];
+
+        // Calcul Main d'œuvre (si le tech a un taux)
+        if ($this->getTechnician() && $this->getTechnician()->getHourlyRate()) {
+            $details['labor'] = $this->getDurationInHours() * $this->getTechnician()->getHourlyRate();
+        }
+
+        // Calcul Coût d'Arrêt (si la machine a un coût d'arrêt)
+        if ($this->getMachine() && $this->getMachine()->getHourlyDowntimeCost()) {
+            $details['downtime'] = $this->getDurationInHours() * $this->getMachine()->getHourlyDowntimeCost();
+        }
+
+        $details['total'] = $details['parts'] + $details['labor'] + $details['downtime'];
+
+        return $details;
+    }
+
+    public function getTotalLaborCost(): float
+    {
+        $rate = $this->technician ? $this->technician->getHourlyRate() : 0;
+        return $this->getDurationInHours() * ($rate ?? 0);
+    }
+
+        public function getTotalDowntimeCost(): float
+        {
+            $cost = $this->machine ? $this->machine->getHourlyDowntimeCost() : 0;
+            return $this->getDurationInHours() * ($cost ?? 0);
+        }
+
+        public function getTotalCost(): float
+        {
+            $partsCost = $this->getTotalPartsCost();
+            $laborCost = $this->getTotalLaborCost();
+            $downtimeCost = $this->getTotalDowntimeCost();
+
+            return $partsCost + $laborCost + $downtimeCost;
+        }
 }
