@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion | UpTime{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card shadow-lg border-0 rounded-3">
+                    {# HEADER AVEC IDENTITÉ VISUELLE #}
+                    <div class="card-header bg-primary text-white text-center py-4 border-0">
+                        <h1 class="h3 mb-0 fw-bold">
+                            <i class="bi bi-shield-lock-fill me-2"></i>UpTime
+                        </h1>
+                        <p class="small mb-0 opacity-75">Maintenance Industrielle Centralisée</p>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5">
+                        <form method="post">
+                            {# GESTION DES ERREURS #}
+                            {% if error %}
+                                <div class="alert alert-danger border-0 small shadow-sm mb-4">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                                </div>
+                            {% endif %}
+
+                            {# SI DÉJÀ CONNECTÉ #}
+                            {% if app.user %}
+                                <div class="alert alert-info border-0 small mb-4">
+                                    Vous êtes connecté en tant que <strong>{{ app.user.userIdentifier }}</strong>.
+                                    <br>
+                                    <a href="{{ path('app_logout') }}" class="alert-link">Se déconnecter</a>
+                                </div>
+                            {% endif %}
+
+                            <h2 class="h5 mb-4 fw-bold text-gray-800 text-center">Accès Plateforme</h2>
+
+                            {# EMAIL #}
+                            <div class="mb-3">
+                                <label for="inputEmail" class="form-label small fw-bold text-muted">EMAIL PROFESSIONNEL</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control border-start-0 ps-0" autocomplete="email" required autofocus placeholder="nom@entreprise.com">
+                                </div>
+                            </div>
+
+                            {# MOT DE PASSE #}
+                            <div class="mb-4">
+                                <label for="inputPassword" class="form-label small fw-bold text-muted">MOT DE PASSE</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-key"></i></span>
+                                    <input type="password" name="password" id="inputPassword" class="form-control border-start-0 ps-0" autocomplete="current-password" required placeholder="••••••••">
+                                </div>
+                            </div>
+
+                            {# CSRF TOKEN (Indispensable pour la sécurité) #}
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                            {# REMEMBER ME #}
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" type="checkbox" name="_remember_me" id="_remember_me" checked>
+                                <label class="form-check-label small text-muted" for="_remember_me">
+                                    Se souvenir de moi sur cet appareil
+                                </label>
+                            </div>
+
+                            {# BOUTON VALIDER #}
+                            <button class="btn btn-primary btn-lg w-100 shadow-sm fw-bold" type="submit">
+                                Connexion <i class="bi bi-box-arrow-in-right ms-2"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {# FOOTER DISCRET #}
+                <div class="text-center mt-4 text-muted small">
+                    <p>&copy; {{ "now"|date("Y") }} UpTime Platform • <a href="#" class="text-decoration-none text-muted">Aide à la connexion</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

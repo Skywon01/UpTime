@@ -40,11 +40,18 @@ class Company
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    /**
+     * @var Collection<int, Part>
+     */
+    #[ORM\OneToMany(targetEntity: Part::class, mappedBy: 'company')]
+    private Collection $parts;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
         $this->machines = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
+        $this->parts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -164,5 +171,35 @@ class Company
     public function setUpdatedAtValue(): void
     {
         $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    /**
+     * @return Collection<int, Part>
+     */
+    public function getParts(): Collection
+    {
+        return $this->parts;
+    }
+
+    public function addPart(Part $part): static
+    {
+        if (!$this->parts->contains($part)) {
+            $this->parts->add($part);
+            $part->setCompany($this);
+        }
+
+        return $this;
+    }
+
+    public function removePart(Part $part): static
+    {
+        if ($this->parts->removeElement($part)) {
+            // set the owning side to null (unless already changed)
+            if ($part->getCompany() === $this) {
+                $part->setCompany(null);
+            }
+        }
+
+        return $this;
     }
 }

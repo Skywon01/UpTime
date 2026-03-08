@@ -39,12 +39,7 @@ class MachineType extends AbstractType
                 ],
                 'attr' => ['class' => 'form-select'] // Pour le style Bootstrap
             ])
-            ->add('company', EntityType::class, [
-                'class' => Company::class,
-                'label' => 'Entreprise associée',
-                'choice_label' => 'name',
-                'placeholder' => 'Choisissez une entreprise', 'required' => false,
-            ])
+
             // Ajout du champ image
             ->add('imageFile', VichImageType::class, [
                 'required' => false,

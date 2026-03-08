@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Company;
 use App\Entity\Intervention;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -62,4 +63,64 @@ class InterventionRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    public function getTotalCostByCompany(Company $company)
+    {
+        // On additionne chaque champ séparément dans la requête
+        return $this->createQueryBuilder('i')
+            ->select('SUM(i.partsPrice) + SUM(i.laborPrice) + SUM(i.downtimeCost) as total')
+            ->where('i.company = :company')
+            ->setParameter('company', $company)
+            ->getQuery()
+            ->getSingleScalarResult() ?: 0;
+    }
+
+    public function findAllFinishedByCompany($company): array
+    {
+        return $this->createQueryBuilder('i')
+            ->join('i.machine', 'm')
+            ->where('m.company = :company')
+            ->andWhere('i.endedAt IS NOT NULL')
+            ->setParameter('company', $company)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countByTypeByCompany($company): array
+    {
+        return $this->createQueryBuilder('i')
+            ->select('i.type, COUNT(i.id) as nombre')
+            ->join('i.machine', 'm')
+            ->where('m.company = :company')
+            ->setParameter('company', $company)
+            ->groupBy('i.type')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countActiveByCompany($company): int
+    {
+        return (int) $this->createQueryBuilder('i')
+            ->select('COUNT(i.id)')
+            ->join('i.machine', 'm')
+            ->where('m.company = :company')
+            ->andWhere('i.endedAt IS NULL')
+            ->setParameter('company', $company)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function findRecentByCompany($company, int $limit = 5): array
+    {
+        return $this->createQueryBuilder('i')
+            ->join('i.machine', 'm') // On doit joindre la machine pour filtrer par entreprise
+            ->where('m.company = :company')
+            ->setParameter('company', $company)
+            ->orderBy('i.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+
 }

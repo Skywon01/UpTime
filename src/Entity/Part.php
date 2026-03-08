@@ -43,6 +43,10 @@ class Part
     #[ORM\OneToMany(targetEntity: InterventionConsumedPart::class, mappedBy: 'part')]
     private Collection $interventionConsumedParts;
 
+    #[ORM\ManyToOne(inversedBy: 'parts')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Company $company = null;
+
     public function __construct()
     {
         $this->machines = new ArrayCollection();
@@ -179,5 +183,17 @@ class Part
         }
 
         $this->stockQuantity -= $quantity;
+    }
+
+    public function getCompany(): ?Company
+    {
+        return $this->company;
+    }
+
+    public function setCompany(?Company $company): static
+    {
+        $this->company = $company;
+
+        return $this;
     }
 }

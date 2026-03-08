@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Company;
 use App\Entity\Machine;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -54,6 +55,48 @@ class MachineRepository extends ServiceEntityRepository
             ->where('m.nextMaintenanceAt < :now')
             ->setParameter('now', new \DateTimeImmutable())
             ->orderBy('m.nextMaintenanceAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findLateMaintenancesByCompany($company): array
+    {
+        return $this->createQueryBuilder('m')
+            ->where('m.company = :company')
+            ->andWhere('m.nextMaintenanceAt < :now')
+            ->setParameter('company', $company)
+            ->setParameter('now', new \DateTimeImmutable())
+            ->orderBy('m.nextMaintenanceAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findUpcomingMaintenancesByCompany($company): array
+    {
+        $now = new \DateTimeImmutable();
+        return $this->createQueryBuilder('m')
+            ->where('m.company = :company')
+            ->andWhere('m.nextMaintenanceAt >= :now')
+            ->andWhere('m.nextMaintenanceAt <= :limit')
+            ->setParameter('company', $company)
+            ->setParameter('now', $now)
+            ->setParameter('limit', $now->modify('+15 days'))
+            ->orderBy('m.nextMaintenanceAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findTopMachinesByCompany(Company $company, int $limit = 5): array
+    {
+        return $this->createQueryBuilder('m')
+            // On sélectionne la machine et on compte ses interventions
+            ->select('m as machine, COUNT(i.id) as interventionCount')
+            ->leftJoin('m.interventions', 'i')
+            ->where('m.company = :company') // LE CLOISONNEMENT
+            ->setParameter('company', $company)
+            ->groupBy('m.id')
+            ->orderBy('interventionCount', 'DESC')
+            ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
     }

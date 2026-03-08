@@ -32,6 +32,7 @@ final class PartController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $part->setCompany($this->getUser()->getCompany());
             $entityManager->persist($part);
             $entityManager->flush();
 

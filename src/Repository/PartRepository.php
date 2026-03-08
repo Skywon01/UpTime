@@ -28,4 +28,18 @@ class PartRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findLowStockPartsByCompany($company, int $limit = 5): array
+    {
+        return $this->createQueryBuilder('p')
+            ->where('p.company = :company')
+            ->andWhere('p.stockQuantity <= 5')
+            ->setParameter('company', $company)
+            ->leftJoin('p.supplier', 's') // Optionnel : pour afficher le nom du fournisseur sans ramer
+            ->addSelect('s')
+            ->orderBy('p.stockQuantity', 'ASC') // <--- C'ÉTAIT ICI ! (p.stock -> p.stockQuantity)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
 }

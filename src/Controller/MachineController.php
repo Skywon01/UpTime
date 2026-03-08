@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Machine;
+use App\Entity\User;
 use App\Form\MachineType;
 use App\Repository\MachineRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,11 +25,21 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 #[Route('/machine')]
 final class MachineController extends AbstractController
 {
-    #[Route(name: 'app_machine_index', methods: ['GET'])]
+    #[Route('/', name: 'app_machine_index', methods: ['GET'])]
     public function index(MachineRepository $machineRepository): Response
     {
+        $user = $this->getUser();
+
+        // Si c'est le Super Admin (GOD), il voit TOUT
+        if ($this->isGranted('ROLE_GOD')) {
+            $machines = $machineRepository->findAll();
+        } else {
+            // Sinon, on ne récupère QUE les machines de son entreprise
+            $machines = $machineRepository->findBy(['company' => $user->getCompany()]);
+        }
+
         return $this->render('machine/index.html.twig', [
-            'machines' => $machineRepository->findAll(),
+            'machines' => $machines,
         ]);
     }
 
@@ -40,10 +51,18 @@ final class MachineController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var User $user */
+            $user = $this->getUser();
+
+            // ON ASSIGNE L'ENTREPRISE DE L'UTILISATEUR À LA MACHINE
+            $machine->setCompany($user->getCompany());
+
             $entityManager->persist($machine);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_machine_index', [], Response::HTTP_SEE_OTHER);
+            $this->addFlash('success', 'La machine a été ajoutée à votre parc.');
+
+            return $this->redirectToRoute('app_machine_index', [], Response::HTTP_SEE_OTHER); // Ou ta redirection habituelle
         }
 
         return $this->render('machine/new.html.twig', [

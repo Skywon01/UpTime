@@ -19,6 +19,19 @@ security:
         main:
             lazy: true
             provider: app_user_provider
+            custom_authenticator: App\Security\AppCustomAuthenticator
+            logout:
+                path: app_logout
+                # where to redirect after logout
+                # target: app_any_route
+
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800
+                path: /
+                # by default, the feature is enabled by checking a checkbox in the
+                # login form, uncomment the following line to always enable it.
+                #always_remember_me: true
 
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -28,8 +41,16 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        # 1. On laisse l'accès libre à la page de login et aux ressources (CSS/JS)
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/js, roles: PUBLIC_ACCESS }
+        - { path: ^/css, roles: PUBLIC_ACCESS }
+
+        # 2. Le GOD garde son accès réservé
+        - { path: ^/god, roles: ROLE_GOD }
+
+        # 3. TOUT LE RESTE demande une connexion
+        - { path: ^/, roles: ROLE_USER }
 
 when@test:
     security:
@@ -42,5 +63,4 @@ when@test:
                 time_cost: 3 # Lowest possible value for argon
                 memory_cost: 10 # Lowest possible value for argon
 
-        access_control:
-            - { path: ^/god, role: ROLE_GOD }
+
