@@ -1,13 +1,63 @@
+{# templates/intervention/edit.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Intervention{% endblock %}
+{% block title %}Modifier l'intervention #{{ intervention.id }}{% endblock %}
 
 {% block body %}
-    <h1>Edit Intervention</h1>
+    <div class="container mt-4">
+        {# Fil d'ariane pour naviguer dans l'historique #}
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb bg-light p-2 rounded shadow-sm small">
+                <li class="breadcrumb-item"><a href="{{ path('app_intervention_index') }}">Interventions</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('app_intervention_show', {id: intervention.id}) }}">Détails #{{ intervention.id }}</a></li>
+                <li class="breadcrumb-item active">Modification du rapport</li>
+            </ol>
+        </nav>
 
-    {{ include('intervention/_form.html.twig', {'button_label': 'Update'}) }}
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                        <h1 class="h4 mb-0 fw-bold">
+                            <i class="bi bi-pencil-square me-2"></i>Modifier le rapport d'intervention
+                        </h1>
 
-    <a href="{{ path('app_intervention_index') }}">back to list</a>
+                        {# Suppression de l'intervention (souvent restreint aux admins, mais on garde la logique) #}
+                        {{ include('intervention/_delete_form.html.twig') }}
+                    </div>
 
-    {{ include('intervention/_delete_form.html.twig') }}
+                    <div class="card-body p-4">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <p class="text-muted mb-0 small">Machine concernée :</p>
+                                <span class="fw-bold text-dark fs-5">{{ intervention.machine.name }}</span>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <p class="text-muted mb-0 small">Date d'ouverture :</p>
+                                <span class="badge bg-light text-dark border">{{ intervention.createdAt|date('d/m/Y H:i') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center mb-4 small">
+                            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                            <div>
+                                Toute modification peut impacter le calcul du <strong>coût total</strong> et les <strong>statistiques de disponibilité</strong> machine.
+                            </div>
+                        </div>
+
+                        {# Inclusion du formulaire #}
+                        {{ include('intervention/_form.html.twig', {'button_label': 'Mettre à jour le rapport'}) }}
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-start">
+                            <a href="{{ path('app_intervention_index') }}" class="btn btn-link text-muted text-decoration-none">
+                                <i class="bi bi-arrow-left"></i> Annuler et revenir à la liste
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

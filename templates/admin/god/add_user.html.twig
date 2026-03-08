@@ -1,0 +1,49 @@
+{# templates/admin/god/add_user.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel utilisateur - {{ company.name }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a href="{{ path('app_company_index') }}">Entreprises</a></li>
+                <li class="breadcrumb-item active">Nouvel accès client</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <div class="col-lg-6 mx-auto">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-dark text-white py-3">
+                        <h1 class="h5 mb-0 fw-bold">
+                            <i class="bi bi-person-plus-fill me-2"></i>Créer un accès pour {{ company.name }}
+                        </h1>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="alert alert-warning small border-0 shadow-sm mb-4">
+                            <i class="bi bi-shield-lock me-2"></i>
+                            L'utilisateur recevra le rôle <strong>Administrateur Client</strong>. Il pourra gérer ses propres machines et techniciens.
+                        </div>
+
+                        {{ form_start(form) }}
+                        {{ form_row(form.email, {'label': 'Adresse Email Professionnelle'}) }}
+                        {{ form_row(form.password, {'label': 'Mot de passe provisoire'}) }}
+                        {# On ne montre pas le champ Company car il est déjà défini #}
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary w-100 shadow-sm">
+                                <i class="bi bi-check2-circle me-2"></i>Générer l'accès
+                            </button>
+                        </div>
+                        {{ form_end(form) }}
+
+                        <div class="text-center mt-3">
+                            <a href="{{ path('app_company_index') }}" class="text-muted small text-decoration-none">Annuler</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

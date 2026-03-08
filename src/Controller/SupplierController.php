@@ -58,7 +58,7 @@ final class SupplierController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
+            $this->addFlash('success', "Le fournisseur \"{$supplier->getName()}\" a bien été mis à jour !");
             return $this->redirectToRoute('app_supplier_index', [], Response::HTTP_SEE_OTHER);
         }
 

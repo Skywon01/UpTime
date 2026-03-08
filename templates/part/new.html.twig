@@ -1,11 +1,45 @@
+{# templates/part/new.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}New Part{% endblock %}
+{% block title %}Nouvelle pièce{% endblock %}
 
 {% block body %}
-    <h1>Create new Part</h1>
+    <div class="container mt-4">
+        {# Fil d'ariane pour guider l'utilisateur #}
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb bg-light p-2 rounded shadow-sm small">
+                <li class="breadcrumb-item"><a href="{{ path('app_part_index') }}">Stock</a></li>
+                <li class="breadcrumb-item active">Ajout d'une référence</li>
+            </ol>
+        </nav>
 
-    {{ include('part/_form.html.twig') }}
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <h1 class="h4 mb-0 fw-bold text-dark">
+                            <i class="bi bi-plus-circle-dotted text-success me-2"></i>Ajouter une pièce détachée
+                        </h1>
+                    </div>
 
-    <a href="{{ path('app_part_index') }}">back to list</a>
+                    <div class="card-body p-4">
+                        <p class="text-muted small mb-4">
+                            Renseignez les informations de la nouvelle pièce pour l'intégrer à l'inventaire et permettre son suivi dans les interventions.
+                        </p>
+
+                        {# Inclusion du formulaire - Ici on peut laisser le label par défaut ou mettre "Créer la pièce" #}
+                        {{ include('part/_form.html.twig', {'button_label': 'Enregistrer la pièce'}) }}
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-start">
+                            <a href="{{ path('app_part_index') }}" class="btn btn-link text-muted text-decoration-none">
+                                <i class="bi bi-arrow-left"></i> Annuler et retourner au stock
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
